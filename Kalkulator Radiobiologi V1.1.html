@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radiobiologi Klinik — LQ Model · BED · OTT · Day Interruption</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Georgia',serif;background:#f4f2ed;color:#1a1a18;min-height:100vh;padding:1rem;}
+  :root{
+    --teal-50:#E1F5EE;--teal-100:#9FE1CB;--teal-600:#0F6E56;--teal-800:#085041;--teal-900:#04342C;
+    --blue-50:#E6F1FB;--blue-600:#185FA5;--blue-800:#0C447C;
+    --amber-50:#FAEEDA;--amber-600:#854F0B;--amber-800:#633806;
+    --red-50:#FCEBEB;--red-100:#F7C1C1;--red-600:#A32D2D;--red-800:#791F1F;
+    --green-50:#EAF3DE;--green-600:#3B6D11;--green-800:#27500A;
+    --gray-50:#F1EFE8;--gray-100:#D3D1C7;--gray-600:#5F5E5A;
+    --bg-primary:#ffffff;--bg-secondary:#f4f2ed;
+    --text-primary:#1a1a18;--text-secondary:#5F5E5A;--text-tertiary:#888780;
+    --border-tertiary:rgba(0,0,0,0.12);--border-secondary:rgba(0,0,0,0.2);
+    --radius-md:8px;--radius-lg:12px;
+  }
+  @media(prefers-color-scheme:dark){
+    body{background:#1a1a18;color:#e8e6e0;}
+    :root{--bg-primary:#242422;--bg-secondary:#1a1a18;--text-primary:#e8e6e0;--text-secondary:#9F9D96;--text-tertiary:#6B6A64;--border-tertiary:rgba(255,255,255,0.1);--border-secondary:rgba(255,255,255,0.18);}
+  }
+  .app{max-width:980px;margin:0 auto;padding:1rem;}
+  .app-header{border-bottom:0.5px solid var(--border-tertiary);padding-bottom:1rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;}
+  .app-title{font-size:20px;font-weight:500;color:var(--text-primary);}
+  .app-sub{font-size:12px;color:var(--text-secondary);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;}
+  .badge{font-size:11px;padding:3px 10px;border-radius:var(--radius-md);background:var(--teal-50);color:var(--teal-600);font-weight:500;}
+  .badge-red{background:var(--red-50);color:var(--red-600);}
+  .tabs{display:flex;gap:4px;margin-bottom:1.5rem;border-bottom:0.5px solid var(--border-tertiary);overflow-x:auto;}
+  .tab{font-size:13px;padding:8px 14px;border:none;background:none;cursor:pointer;color:var(--text-secondary);border-bottom:2px solid transparent;margin-bottom:-0.5px;font-family:inherit;white-space:nowrap;}
+  .tab.active{color:var(--teal-600);border-bottom-color:var(--teal-600);font-weight:500;}
+  .tab.tab-alert{color:var(--red-600);}
+  .tab.tab-alert.active{border-bottom-color:var(--red-600);}
+  .section{display:none;}.section.active{display:block;}
+  .card{background:var(--bg-primary);border:0.5px solid var(--border-tertiary);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1rem;}
+  .card.card-alert{border:1px solid var(--red-600);}
+  .card-title{font-size:13px;font-weight:500;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1rem;}
+  .card-title-red{color:var(--red-800);}
+  .card-title-green{color:var(--green-800);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  @media(max-width:650px){.grid2,.grid3,.grid4{grid-template-columns:1fr;}}
+  .field{display:flex;flex-direction:column;gap:4px;}
+  .field label{font-size:12px;color:var(--text-secondary);font-family:sans-serif;}
+  .field input,.field select{font-size:14px;padding:8px 10px;border-radius:var(--radius-md);border:0.5px solid var(--border-secondary);background:var(--bg-secondary);color:var(--text-primary);width:100%;font-family:inherit;}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--teal-600);box-shadow:0 0 0 2px rgba(15,110,86,.15);}
+  .hint{font-size:11px;color:var(--text-tertiary);margin-top:2px;font-family:sans-serif;}
+  .results-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:1rem;}
+  .rc{background:var(--bg-secondary);border-radius:var(--radius-md);padding:1rem;}
+  .rc-label{font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;font-family:sans-serif;}
+  .rc-value{font-size:26px;font-weight:500;color:var(--text-primary);}
+  .rc-unit{font-size:12px;color:var(--text-secondary);margin-top:2px;font-family:sans-serif;}
+  .rc.hl{background:var(--teal-50);}.rc.hl .rc-value{color:var(--teal-600);}.rc.hl .rc-label{color:var(--teal-800);}
+  .rc.inf{background:var(--blue-50);}.rc.inf .rc-value{color:var(--blue-600);}.rc.inf .rc-label{color:var(--blue-800);}
+  .rc.wn{background:var(--amber-50);}.rc.wn .rc-value{color:var(--amber-600);}.rc.wn .rc-label{color:var(--amber-800);}
+  .rc.dng{background:var(--red-50);}.rc.dng .rc-value{color:var(--red-600);}.rc.dng .rc-label{color:var(--red-800);}
+  .rc.ok{background:var(--green-50);}.rc.ok .rc-value{color:var(--green-600);}.rc.ok .rc-label{color:var(--green-800);}
+  .btn{font-size:13px;padding:8px 18px;border-radius:var(--radius-md);border:0.5px solid var(--border-secondary);background:transparent;cursor:pointer;color:var(--text-primary);font-family:inherit;}
+  .btn:hover{background:var(--bg-secondary);}
+  .btn.primary{background:var(--teal-600);color:white;border-color:var(--teal-600);}
+  .btn.primary:hover{background:var(--teal-800);}
+  .btn.alert-btn{background:var(--red-600);color:white;border-color:var(--red-600);}
+  .btn.alert-btn:hover{background:var(--red-800);}
+  .btn.success-btn{background:var(--green-600);color:white;border-color:var(--green-600);}
+  .btn.success-btn:hover{background:var(--green-800);}
+  .btn.danger{border-color:var(--red-600);color:var(--red-600);}
+  .btn.danger:hover{background:var(--red-50);}
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:1rem;}
+  .formula-box{font-family:monospace;font-size:13px;background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px 16px;color:var(--text-secondary);margin-top:.5rem;line-height:1.9;}
+  .fv{color:var(--teal-600);font-weight:500;}
+  .fvr{color:var(--red-600);font-weight:500;}
+  .history-table{width:100%;border-collapse:collapse;font-size:13px;font-family:sans-serif;}
+  .history-table th{font-weight:500;color:var(--text-secondary);font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;text-align:left;border-bottom:0.5px solid var(--border-tertiary);}
+  .history-table td{padding:10px 10px;border-bottom:0.5px solid var(--border-tertiary);color:var(--text-primary);vertical-align:middle;}
+  .history-table tr:hover td{background:var(--bg-secondary);}
+  .empty-state{text-align:center;padding:3rem 1rem;color:var(--text-secondary);font-size:14px;font-family:sans-serif;}
+  .note{margin-top:1rem;padding:12px 14px;border-radius:var(--radius-md);border-left:3px solid var(--teal-600);background:var(--teal-50);font-size:13px;color:var(--teal-800);line-height:1.6;font-family:sans-serif;}
+  .note.red{border-left-color:var(--red-600);background:var(--red-50);color:var(--red-800);}
+  .divider{border:none;border-top:0.5px solid var(--border-tertiary);margin:1rem 0;}
+  /* interrupt */
+  .banner{background:var(--red-50);border:1px solid var(--red-100);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:flex-start;gap:12px;}
+  .banner-icon{font-size:20px;flex-shrink:0;line-height:1;}
+  .banner-title{font-size:14px;font-weight:500;color:var(--red-800);margin-bottom:2px;}
+  .banner-sub{font-size:12px;color:var(--red-600);font-family:sans-serif;}
+  .day-list{margin-top:.75rem;display:flex;flex-direction:column;gap:8px;}
+  .day-item{display:flex;align-items:center;gap:8px;font-family:sans-serif;font-size:13px;flex-wrap:wrap;}
+  .day-item input[type=date]{flex:1;min-width:130px;}
+  .day-item select{flex:2;min-width:160px;}
+  .rm-btn{font-size:11px;padding:4px 10px;border:0.5px solid var(--border-secondary);border-radius:var(--radius-md);background:transparent;cursor:pointer;color:var(--text-secondary);font-family:inherit;flex-shrink:0;}
+  .rm-btn:hover{background:var(--red-50);border-color:var(--red-600);color:var(--red-600);}
+  .alpha-beta-preset{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+  .preset-btn{font-size:11px;padding:3px 10px;border:0.5px solid var(--border-secondary);border-radius:var(--radius-md);background:transparent;cursor:pointer;color:var(--text-secondary);font-family:inherit;}
+  .preset-btn:hover{background:var(--bg-secondary);}
+  /* print */
+  .print-preview-wrap{background:var(--bg-secondary);border-radius:var(--radius-lg);padding:1.5rem;}
+  .print-doc{background:white;color:#222;border-radius:4px;padding:40px 48px;font-family:'Times New Roman',serif;font-size:13px;line-height:1.6;max-width:700px;margin:0 auto;box-shadow:0 2px 12px rgba(0,0,0,.1);}
+  .print-doc .dh{text-align:center;border-bottom:2px solid #222;padding-bottom:10px;margin-bottom:16px;}
+  .print-doc .ds{margin-bottom:14px;}
+  .print-doc .dst{font-weight:bold;font-size:12px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #999;padding-bottom:3px;margin-bottom:8px;}
+  .print-doc table{width:100%;border-collapse:collapse;}
+  .print-doc table td{padding:4px 8px;font-size:12px;}
+  .print-doc table td:first-child{color:#555;width:50%;}
+  .print-doc table td:last-child{font-weight:500;}
+  .print-doc .sig-row{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:32px;}
+  .print-doc .sig-block{text-align:center;}
+  .print-doc .sig-line{border-top:1px solid #333;padding-top:6px;margin-top:60px;font-size:12px;}
+  .print-doc .sig-title{font-size:11px;color:#555;}
+  .ow{overflow-x:auto;}
+  /* modal */
+  #staff-modal{display:none;}
+  #staff-modal.open{display:flex!important;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="app-header">
+    <div>
+      <div class="app-title">Radiobiologi Klinik</div>
+      <div class="app-sub" id="header-inst-sub">LQ Model · BED · OTT · Day Interruption</div>
+      <div id="header-inst-name" style="font-size:11px;color:var(--teal-600);margin-top:3px;font-family:sans-serif;display:none"></div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <span class="badge">Fisika Medis</span>
+      <span class="badge badge-red" id="int-badge" style="display:none">Interupsi Aktif</span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('calc')">Kalkulator</button>
+    <button class="tab tab-alert" onclick="showTab('interrupt')">Gangguan Hari Sinar</button>
+    <button class="tab" onclick="showTab('history')">Riwayat</button>
+    <button class="tab" onclick="showTab('print')">Cetak Laporan</button>
+    <button class="tab" onclick="showTab('reference')">Referensi</button>
+    <button class="tab" onclick="showTab('settings')">⚙ Pengaturan</button>
+  </div>
+
+  <!-- KALKULATOR -->
+  <div id="sec-calc" class="section active">
+    <div class="card">
+      <div class="card-title">Data Pasien</div>
+      <div class="grid3">
+        <div class="field"><label>Nama Pasien</label><input type="text" id="pt-name" placeholder="Nama lengkap"></div>
+        <div class="field"><label>Nomor RM</label><input type="text" id="pt-rm" placeholder="000000"></div>
+        <div class="field">
+          <label>Jenis Kanker</label>
+          <select id="pt-cancer">
+            <option value="">-- Pilih --</option>
+            <option>Ca Serviks</option><option>Ca Payudara</option><option>Ca Nasofaring</option>
+            <option>Ca Paru</option><option>Ca Prostat</option><option>Ca Rektum</option>
+            <option>Ca Endometrium</option><option>Ca Kepala &amp; Leher</option>
+            <option>Glioblastoma</option><option>Medulloblastoma</option><option>Limfoma</option><option>Lainnya</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid2" style="margin-top:12px">
+        <div class="field"><label>Tanggal Kalkulasi</label><input type="date" id="pt-date"></div>
+        <div class="field">
+          <label>Modalitas</label>
+          <select id="pt-modality">
+            <option>External Beam RT (EBRT)</option><option>Brachytherapy HDR</option>
+            <option>Brachytherapy LDR</option><option>SBRT / SABR</option><option>IMRT</option><option>VMAT</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Parameter Fraksinasi</div>
+      <div class="grid3">
+        <div class="field"><label>Dosis per Fraksi (d)</label><input type="number" id="p-d" step="0.01" value="2"><div class="hint">Gy / fraksi</div></div>
+        <div class="field"><label>Jumlah Fraksi (n)</label><input type="number" id="p-n" value="25" onchange="autoFillEndDate()"><div class="hint">fraksi</div></div>
+        <div class="field"><label>Fraksi per Minggu</label><input type="number" id="p-fw" value="5" onchange="autoFillEndDate()"><div class="hint">fraksi / minggu</div></div>
+      </div>
+      <div class="grid2" style="margin-top:12px">
+        <div class="field">
+          <label>α/β Tumor</label><input type="number" id="p-abt" step="0.1" value="10">
+          <div class="hint">Gy — umumnya 10 Gy</div>
+          <div class="alpha-beta-preset">
+            <button class="preset-btn" onclick="setAB('t',10)">Tumor (10)</button>
+            <button class="preset-btn" onclick="setAB('t',3)">Prostat (3)</button>
+            <button class="preset-btn" onclick="setAB('t',8.5)">Payudara (8.5)</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>α/β OAR (Jaringan Sehat)</label><input type="number" id="p-abo" step="0.1" value="3">
+          <div class="hint">Gy — late responding umumnya 3 Gy</div>
+          <div class="alpha-beta-preset">
+            <button class="preset-btn" onclick="setAB('o',3)">Late (3)</button>
+            <button class="preset-btn" onclick="setAB('o',10)">Early (10)</button>
+            <button class="preset-btn" onclick="setAB('o',2)">Spinal cord (2)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Parameter OTT</div>
+      <div class="grid3">
+        <div class="field">
+          <label>Tanggal Mulai RT</label>
+          <input type="date" id="p-ts" onchange="autoFillEndDate()">
+        </div>
+        <div class="field">
+          <label>Tanggal Selesai RT (Rencana)</label>
+          <input type="date" id="p-te" style="background:var(--teal-50);border-color:var(--teal-600)" readonly title="Dihitung otomatis dari tanggal mulai, jumlah fraksi, fraksi/minggu, dan libur">
+          <div class="hint" id="p-te-hint" style="color:var(--teal-600)"></div>
+        </div>
+        <div class="field"><label>Dosis Proliferasi (Dprolif)</label><input type="number" id="p-dp" step="0.01" value="0.6"><div class="hint">Gy/hari (tipikal 0.6)</div></div>
+      </div>
+      <div id="ott-schedule-info" style="display:none;margin-top:12px;background:var(--bg-secondary);border-radius:var(--radius-md);padding:10px 14px;font-family:sans-serif;font-size:12px;color:var(--text-secondary);line-height:1.8">
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn primary" onclick="calculate()">Hitung Semua Parameter</button>
+      <button class="btn" onclick="resetForm()">Reset</button>
+    </div>
+
+    <div id="results-section" style="display:none">
+      <div class="card" style="margin-top:1rem">
+        <div class="card-title">Hasil Kalkulasi — Tanpa Interupsi</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;font-family:sans-serif">Dosis Total: <strong id="r-D" style="color:var(--text-primary)">—</strong></div>
+        <div class="results-grid">
+          <div class="rc hl"><div class="rc-label">BED Tumor</div><div class="rc-value" id="r-bt">—</div><div class="rc-unit">Gy</div></div>
+          <div class="rc inf"><div class="rc-label">BED OAR</div><div class="rc-value" id="r-bo">—</div><div class="rc-unit">Gy</div></div>
+          <div class="rc"><div class="rc-label">EQD2 Tumor</div><div class="rc-value" id="r-et">—</div><div class="rc-unit">Gy</div></div>
+          <div class="rc"><div class="rc-label">EQD2 OAR</div><div class="rc-value" id="r-eo">—</div><div class="rc-unit">Gy</div></div>
+          <div class="rc wn"><div class="rc-label">OTT Rencana</div><div class="rc-value" id="r-ott">—</div><div class="rc-unit">hari</div></div>
+          <div class="rc wn"><div class="rc-label">BED Terkoreksi OTT</div><div class="rc-value" id="r-bott">—</div><div class="rc-unit">Gy</div></div>
+        </div>
+        <div class="divider"></div>
+        <div class="formula-box">
+          <div>BED = <span class="fv">n × d × (1 + d / (α/β))</span></div>
+          <div>EQD2 = <span class="fv">BED / (1 + 2 / (α/β))</span></div>
+          <div>BED<sub>OTT</sub> = <span class="fv">BED − Dprolif × T</span></div>
+        </div>
+        <div class="note" id="r-note"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary" onclick="saveToHistory()">Simpan ke Riwayat</button>
+        <button class="btn alert-btn" onclick="showTab('interrupt')">Input Hari Interupsi ↗</button>
+        <button class="btn" onclick="showTab('print')">Cetak Laporan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY INTERRUPTION -->
+  <div id="sec-interrupt" class="section">
+    <div class="banner">
+      <div class="banner-icon">⚠</div>
+      <div>
+        <div class="banner-title">Modul Gangguan Hari Sinar (Day Interruption)</div>
+        <div class="banner-sub">Catat hari-hari pasien tidak mendapat sinar. Sistem menghitung BED yang hilang akibat proliferasi tumor dan merekomendasikan tambahan fraksi sebagai kompensasi.</div>
+      </div>
+    </div>
+
+    <div class="card card-alert">
+      <div class="card-title card-title-red">Daftar Hari Tidak Sinar</div>
+      <div style="font-family:sans-serif;font-size:12px;color:var(--text-secondary);margin-bottom:12px">Tambahkan hari tidak sinar satu per satu, atau masukkan rentang tanggal untuk ketidakhadiran berurutan.</div>
+
+      <!-- RANGE INPUT PANEL -->
+      <div style="background:var(--red-50);border:1px solid var(--red-100);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:12px">
+        <div style="font-size:12px;font-weight:500;color:var(--red-800);margin-bottom:10px;font-family:sans-serif">Tambah Rentang Tanggal Berurutan</div>
+        <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+          <div class="field" style="flex:1;min-width:130px">
+            <label style="color:var(--red-800)">Dari Tanggal</label>
+            <input type="date" id="range-from" style="border-color:var(--red-600)">
+          </div>
+          <div class="field" style="flex:1;min-width:130px">
+            <label style="color:var(--red-800)">Sampai Tanggal</label>
+            <input type="date" id="range-to" style="border-color:var(--red-600)">
+          </div>
+          <div class="field" style="flex:2;min-width:160px">
+            <label style="color:var(--red-800)">Alasan</label>
+            <select id="range-alasan"></select>
+          </div>
+          <div class="field" style="min-width:160px">
+            <label style="color:var(--red-800)">Mode penambahan</label>
+            <select id="range-mode">
+              <option value="treatment">Hanya hari sinar (skip weekend &amp; libur)</option>
+              <option value="all">Semua hari kalender</option>
+            </select>
+          </div>
+          <button class="btn alert-btn" style="padding:8px 16px;flex-shrink:0;align-self:flex-end" onclick="addDayRange()">Tambah Rentang</button>
+        </div>
+        <div id="range-preview" style="margin-top:8px;font-size:12px;color:var(--red-600);font-family:sans-serif;min-height:18px"></div>
+      </div>
+
+      <!-- SINGLE DAY ADD -->
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+        <span style="font-size:12px;color:var(--text-secondary);font-family:sans-serif">Atau tambah satu hari:</span>
+        <button class="btn" style="font-size:12px;padding:5px 14px" onclick="addDay()">+ Satu Hari</button>
+      </div>
+
+      <div id="day-list" class="day-list"></div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center">
+        <span id="day-count-label" style="font-size:12px;color:var(--text-secondary);font-family:sans-serif"></span>
+        <button class="btn danger" style="font-size:12px;padding:5px 14px;margin-left:auto" onclick="clearDays()">Bersihkan Semua</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Strategi Kompensasi</div>
+      <div class="grid3">
+        <div class="field">
+          <label>Metode Kompensasi</label>
+          <select id="c-strategy">
+            <option value="extra_frac">Tambah Fraksi (dosis sama)</option>
+            <option value="extra_dose">Naikkan Dosis/Fraksi</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Dosis/Fraksi Kompensasi</label>
+          <input type="number" id="c-d" placeholder="Sama seperti rencana" step="0.01">
+          <div class="hint">Gy — kosongkan = sama dengan rencana</div>
+        </div>
+        <div class="field">
+          <label>Batas Toleransi OAR (EQD2 max)</label>
+          <input type="number" id="c-oarlimit" value="60" step="1">
+          <div class="hint">Gy — batas aman jaringan sehat</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn alert-btn" onclick="calcInterrupt()">Hitung Kompensasi</button>
+      <button class="btn" onclick="showTab('calc')">← Kembali ke Kalkulator</button>
+    </div>
+
+    <div id="int-results" style="display:none;margin-top:1rem">
+
+      <div class="card card-alert">
+        <div class="card-title card-title-red">Dampak Interupsi terhadap BED</div>
+        <div class="results-grid">
+          <div class="rc dng"><div class="rc-label">Total Hari Interupsi</div><div class="rc-value" id="i-days">—</div><div class="rc-unit">hari tidak sinar</div></div>
+          <div class="rc dng"><div class="rc-label">BED Hilang (Proliferasi)</div><div class="rc-value" id="i-blost">—</div><div class="rc-unit">Gy</div></div>
+          <div class="rc wn"><div class="rc-label">BED Efektif Tumor</div><div class="rc-value" id="i-beff">—</div><div class="rc-unit">Gy (setelah interupsi)</div></div>
+          <div class="rc wn"><div class="rc-label">EQD2 Efektif</div><div class="rc-value" id="i-eeff">—</div><div class="rc-unit">Gy</div></div>
+          <div class="rc"><div class="rc-label">OTT Aktual (prediksi)</div><div class="rc-value" id="i-ott-act">—</div><div class="rc-unit">hari</div></div>
+          <div class="rc dng"><div class="rc-label">Perpanjangan OTT</div><div class="rc-value" id="i-ottdef">—</div><div class="rc-unit">hari dari rencana</div></div>
+        </div>
+      </div>
+
+      <div class="card" style="border:1px solid var(--green-600)">
+        <div class="card-title card-title-green">Rekomendasi Kompensasi</div>
+        <div class="results-grid">
+          <div class="rc ok"><div class="rc-label">Tambahan Fraksi</div><div class="rc-value" id="i-nex">—</div><div class="rc-unit">fraksi</div></div>
+          <div class="rc ok"><div class="rc-label">Dosis/Fraksi Kompensasi</div><div class="rc-value" id="i-dex">—</div><div class="rc-unit">Gy/fraksi</div></div>
+          <div class="rc ok"><div class="rc-label">Total Dosis Kompensasi</div><div class="rc-value" id="i-dtot">—</div><div class="rc-unit">Gy</div></div>
+          <div class="rc hl"><div class="rc-label">BED Final</div><div class="rc-value" id="i-bfin">—</div><div class="rc-unit">Gy</div></div>
+          <div class="rc hl"><div class="rc-label">EQD2 Final</div><div class="rc-value" id="i-efin">—</div><div class="rc-unit">Gy</div></div>
+          <div class="rc inf"><div class="rc-label">EQD2 OAR Baru</div><div class="rc-value" id="i-eoar">—</div><div class="rc-unit">Gy</div></div>
+          <div class="rc" id="i-oar-card"><div class="rc-label">Status OAR</div><div class="rc-value" id="i-oar-v">—</div><div class="rc-unit" id="i-oar-u">—</div></div>
+        </div>
+        <div class="divider"></div>
+        <div class="formula-box">
+          <div>BED hilang = <span class="fvr">Dprolif × Σ(hari interupsi)</span></div>
+          <div>n_ekstra = <span class="fv">⌈BED_hilang / (d_komp × (1 + d_komp / (α/β_tumor)))⌉</span></div>
+          <div>BED_final = <span class="fv">BED_tumor + (n_ekstra × BED_per_fx_komp) − BED_hilang</span></div>
+          <div>Syarat: <span class="fv">EQD2_OAR_baru ≤ batas toleransi</span></div>
+        </div>
+        <div class="note" id="i-note"></div>
+      </div>
+
+      <!-- DETAIL TABLE -->
+      <div class="card">
+        <div class="card-title">Rincian Hari Interupsi</div>
+        <div class="ow">
+          <table class="history-table">
+            <thead><tr><th>#</th><th>Tanggal</th><th>Alasan</th><th>Perkiraan Setelah Fraksi ke-</th><th>Dprolif (Gy)</th><th>BED Hilang (Gy)</th></tr></thead>
+            <tbody id="i-detail"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn primary" onclick="saveToHistory()">Simpan ke Riwayat</button>
+        <button class="btn" onclick="showTab('print')">Cetak Laporan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIWAYAT -->
+  <div id="sec-history" class="section">
+    <div class="card">
+      <div class="card-title">Riwayat Pasien Tersimpan</div>
+      <div id="history-content"><div class="empty-state">Belum ada data tersimpan.</div></div>
+    </div>
+    <div class="btn-row"><button class="btn danger" onclick="clearHistory()">Hapus Semua Riwayat</button></div>
+  </div>
+
+  <!-- CETAK -->
+  <div id="sec-print" class="section">
+    <div class="card">
+      <div class="card-title">Pengaturan Laporan</div>
+      <div style="font-family:sans-serif;font-size:12px;color:var(--text-secondary);margin-bottom:12px">
+        Institusi dan staf diambil dari <strong>Pengaturan Sistem</strong>. Pilih dari daftar di bawah.
+      </div>
+      <!-- Institusi info (read-only from settings) -->
+      <div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:12px;font-family:sans-serif;font-size:13px;display:flex;gap:24px;flex-wrap:wrap">
+        <div><span style="color:var(--text-secondary);font-size:11px;text-transform:uppercase;letter-spacing:.04em">Institusi</span><br><strong id="print-inst-display">—</strong></div>
+        <div><span style="color:var(--text-secondary);font-size:11px;text-transform:uppercase;letter-spacing:.04em">Departemen</span><br><strong id="print-dept-display">—</strong></div>
+        <div style="margin-left:auto;align-self:center"><button class="btn" style="font-size:11px;padding:4px 12px" onclick="showTab('settings')">Edit ↗</button></div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Fisikawan Medis</label>
+          <select id="s-ph">
+            <option value="">-- Pilih dari daftar --</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Dokter Onkologi Radiasi</label>
+          <select id="s-oc">
+            <option value="">-- Pilih dari daftar --</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:1rem">
+        <button class="btn primary" onclick="generatePrint()">Pratinjau Laporan</button>
+        <button class="btn" onclick="printDoc()">Cetak / Simpan PDF</button>
+      </div>
+    </div>
+    <div class="print-preview-wrap" id="print-area" style="display:none">
+      <div class="print-doc" id="print-doc-content"></div>
+    </div>
+  </div>
+
+  <!-- PENGATURAN SISTEM -->
+  <div id="sec-settings" class="section">
+
+    <!-- Institusi -->
+    <div class="card">
+      <div class="card-title">Identitas Institusi</div>
+      <div class="grid2">
+        <div class="field"><label>Nama Institusi / RS</label><input type="text" id="cfg-inst" placeholder="RS / Klinik Onkologi ..."></div>
+        <div class="field"><label>Departemen / Unit</label><input type="text" id="cfg-dept" placeholder="Departemen Radioterapi"></div>
+      </div>
+      <div class="grid2" style="margin-top:12px">
+        <div class="field"><label>Alamat</label><input type="text" id="cfg-addr" placeholder="Jl. ..."></div>
+        <div class="field"><label>Telp / Email</label><input type="text" id="cfg-contact" placeholder="021-xxx / info@rs.id"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary" onclick="saveInstitusi()">Simpan Identitas</button>
+        <div id="inst-saved-msg" style="font-family:sans-serif;font-size:12px;color:var(--teal-600);align-self:center;display:none">✓ Tersimpan</div>
+      </div>
+    </div>
+
+    <!-- Libur Lokal -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:8px">
+        <div class="card-title" style="margin-bottom:0">Libur Lokal / Hari Khusus</div>
+        <button class="btn primary" style="font-size:12px;padding:6px 14px" onclick="addHoliday()">+ Tambah Libur</button>
+      </div>
+      <div style="font-family:sans-serif;font-size:12px;color:var(--text-secondary);margin-bottom:10px;line-height:1.6">
+        Tambahkan libur nasional, libur institusi, atau hari khusus yang mempengaruhi jadwal RT. Akhir pekan (Sabtu–Minggu) sudah otomatis dikecualikan.
+      </div>
+      <div id="holiday-list-settings"></div>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" style="font-size:11px;padding:4px 12px" onclick="addNasionalHolidays()">+ Impor Libur Nasional Indonesia</button>
+        <button class="btn danger" style="font-size:11px;padding:4px 12px" onclick="clearHolidays()">Hapus Semua Libur</button>
+      </div>
+    </div>
+
+    <!-- Fisikawan Medis -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+        <div class="card-title" style="margin-bottom:0">Daftar Fisikawan Medis</div>
+        <button class="btn primary" onclick="openStaffModal('physicist','')">+ Tambah</button>
+      </div>
+      <div id="physicist-list"></div>
+    </div>
+
+    <!-- Dokter Onkologi -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+        <div class="card-title" style="margin-bottom:0">Daftar Dokter Onkologi Radiasi</div>
+        <button class="btn primary" onclick="openStaffModal('oncologist','')">+ Tambah</button>
+      </div>
+      <div id="oncologist-list"></div>
+    </div>
+
+    <!-- Backup & Restore -->
+    <div class="card">
+      <div class="card-title">Backup &amp; Pemulihan Data</div>
+      <div style="font-family:sans-serif;font-size:13px;color:var(--text-secondary);margin-bottom:1rem;line-height:1.6">
+        Ekspor semua data (pengaturan, staf, dan riwayat pasien) ke file JSON untuk backup atau pindah perangkat.
+      </div>
+      <div class="btn-row" style="margin-top:0">
+        <button class="btn primary" onclick="exportData()">Ekspor Data (JSON)</button>
+        <button class="btn" onclick="document.getElementById('import-file').click()">Impor Data (JSON)</button>
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+      </div>
+      <div class="divider"></div>
+      <div style="font-family:sans-serif;font-size:12px;color:var(--text-secondary);margin-bottom:8px">Zona Berbahaya</div>
+      <div class="btn-row" style="margin-top:0">
+        <button class="btn danger" onclick="resetAllData()">Hapus Semua Data Aplikasi</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- STAFF MODAL -->
+  <div id="staff-modal" style="display:none">
+    <div style="background:var(--bg-primary);border-radius:var(--radius-lg);padding:1.5rem;width:100%;max-width:440px;margin:1rem;box-shadow:0 8px 32px rgba(0,0,0,.18)">
+      <div style="font-size:15px;font-weight:500;color:var(--text-primary);margin-bottom:1rem" id="modal-title">Tambah Staf</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="field"><label>Nama Lengkap</label><input type="text" id="modal-name" placeholder="dr. / MSc. ..."></div>
+        <div class="field"><label>Gelar / Spesialisasi</label><input type="text" id="modal-title-field" placeholder="Sp.Onk.Rad / MSc.Med.Phys ..."></div>
+        <div class="field"><label>No. SIP / Registrasi</label><input type="text" id="modal-sip" placeholder="SIP-xxx (opsional)"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:1.25rem;justify-content:flex-end">
+        <button class="btn" onclick="closeModal()">Batal</button>
+        <button class="btn primary" onclick="saveStaff()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REFERENSI -->
+  <div id="sec-reference" class="section">
+    <div class="card">
+      <div class="card-title">Nilai α/β Referensi Klinis</div>
+      <div class="ow"><table class="history-table"><thead><tr><th>Jaringan / Tumor</th><th>α/β (Gy)</th><th>Kategori</th><th>Keterangan</th></tr></thead><tbody id="ref-table"></tbody></table></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Batasan Toleransi Dosis OAR</div>
+      <div class="ow"><table class="history-table"><thead><tr><th>Organ</th><th>Batasan EQD2</th><th>Endpoint</th></tr></thead><tbody id="tol-table"></tbody></table></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Pedoman Kompensasi Interupsi</div>
+      <div style="font-family:sans-serif;font-size:13px;line-height:1.8;color:var(--text-primary)">
+        <p style="margin-bottom:.5rem"><strong>Prinsip dasar:</strong> Setiap hari perpanjangan terapi setelah onset repopulasi klonogenik (~hari ke-21 RT) menyebabkan kehilangan BED setara Dprolif (0.5–0.7 Gy/hari).</p>
+        <p style="margin-bottom:.5rem"><strong>Rekomendasi ICRU/ESTRO:</strong> Kompensasi dilakukan sesegera mungkin. Fraksi tambahan diberikan dengan dosis sama atau sedikit lebih rendah untuk menjaga therapeutic ratio.</p>
+        <p style="margin-bottom:.5rem"><strong>Batas OAR:</strong> Total EQD2 tidak boleh melebihi toleransi jaringan sehat. Jika kompensasi penuh berisiko, pertimbangkan kompensasi parsial.</p>
+        <p><strong>Formula:</strong> BED_eff = BED_rencana − Dprolif × ΔT (hari interupsi). Kompensasi: n_ekstra = ⌈BED_hilang / BED_per_fx_komp⌉.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const REF=[
+  ['Tumor solid (umum)','10','Tumor','Sel cepat membelah'],
+  ['Ca Prostat','1.5–3','Tumor','Low α/β, hipofraksinasi efektif'],
+  ['Ca Payudara','4–8.5','Tumor','Bervariasi antar subtipe'],
+  ['Ca Nasofaring','10–16','Tumor','Respons baik terhadap RT'],
+  ['Ca Serviks','8–10','Tumor','Kombinasi brachytherapy'],
+  ['Ca Paru (NSCLC)','8–10','Tumor','SBRT favorabel'],
+  ['Medulloblastoma','10','Tumor','Pediatrik, sensitif'],
+  ['Glioblastoma','10','Tumor','Standar 60 Gy/30 fx'],
+  ['Mukosa mulut (akut)','10–12','OAR (Early)','Early responding'],
+  ['Spinal cord','2','OAR (Late)','Toleransi ketat'],
+  ['Rektum','3','OAR (Late)','Late responding'],
+  ['Buli-buli','5','OAR (Late)','Moderate'],
+  ['Paru (pneumonitis)','3–4','OAR (Late)','Late responding'],
+  ['Ginjal','2.5–3','OAR (Late)','Late responding'],
+  ['Hati','2–3','OAR (Late)','Late responding'],
+  ['Jaringan ikat','3','OAR (Late)','Late responding klasik'],
+];
+const TOL=[
+  ['Spinal Cord','45 Gy','Mielopati'],
+  ['Parotid','26 Gy (mean)','Xerostomia permanen'],
+  ['Paru (V20)','< 35%','Pneumonitis grade ≥ 3'],
+  ['Jantung','< 26 Gy (mean)','Kardiotoksisitas'],
+  ['Rektum','60–70 Gy','Proktitis'],
+  ['Buli-buli','65 Gy','Sistitis'],
+  ['Femoral heads','45 Gy','Nekrosis avaskuler'],
+  ['Optik chiasm','54 Gy','Neuropati optik'],
+  ['Brainstem','54 Gy','Neuropati berat'],
+];
+const ALASAN=['Mesin Rusak / Maintenance','Pasien Sakit / Rawat Inap','Libur Nasional','Kendala Administrasi','Efek Samping Akut RT','Cuaca / Force Majeure','Alasan Pribadi Pasien','Lainnya'];
+
+let lastCalc=null, interruptDays=[], lastInt=null;
+
+// ---- SETTINGS STATE ----
+function loadSettings(){
+  try{ return JSON.parse(localStorage.getItem('radiobio_settings')||'{}'); }catch(e){ return {}; }
+}
+function saveSettings(obj){
+  localStorage.setItem('radiobio_settings', JSON.stringify(obj));
+}
+function getStaff(role){
+  const cfg=loadSettings();
+  return cfg[role]||[];
+}
+function saveStaffList(role, list){
+  const cfg=loadSettings(); cfg[role]=list; saveSettings(cfg);
+}
+
+function showTab(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  const idx=['calc','interrupt','history','print','reference','settings'].indexOf(id);
+  if(idx>=0) document.querySelectorAll('.tab')[idx].classList.add('active');
+  if(id==='print') refreshPrintSelects();
+  if(id==='settings'){ loadInstitusiForm(); renderStaffList('physicist'); renderStaffList('oncologist'); renderHolidayList(); }
+  if(id==='interrupt'){ renderDayList(); setTimeout(setupRangePreview,50); }
+}
+
+function v(id){return parseFloat(document.getElementById(id).value)||0;}
+function s(id){return document.getElementById(id).value.trim();}
+function setAB(w,val){document.getElementById(w==='t'?'p-abt':'p-abo').value=val;}
+
+// ---- INSTITUSI ----
+function loadInstitusiForm(){
+  const cfg=loadSettings();
+  document.getElementById('cfg-inst').value=cfg.inst||'';
+  document.getElementById('cfg-dept').value=cfg.dept||'';
+  document.getElementById('cfg-addr').value=cfg.addr||'';
+  document.getElementById('cfg-contact').value=cfg.contact||'';
+}
+function saveInstitusi(){
+  const cfg=loadSettings();
+  cfg.inst=s('cfg-inst'); cfg.dept=s('cfg-dept');
+  cfg.addr=s('cfg-addr'); cfg.contact=s('cfg-contact');
+  saveSettings(cfg);
+  const msg=document.getElementById('inst-saved-msg');
+  msg.style.display='inline'; setTimeout(()=>msg.style.display='none',2200);
+  refreshPrintDisplays();
+}
+function refreshPrintDisplays(){
+  const cfg=loadSettings();
+  const instEl=document.getElementById('print-inst-display');
+  const deptEl=document.getElementById('print-dept-display');
+  const headerName=document.getElementById('header-inst-name');
+  if(instEl) instEl.textContent=cfg.inst||'—';
+  if(deptEl) deptEl.textContent=cfg.dept||'—';
+  if(headerName){
+    if(cfg.inst){
+      headerName.textContent=cfg.inst+(cfg.dept?' — '+cfg.dept:'');
+      headerName.style.display='block';
+    } else {
+      headerName.style.display='none';
+    }
+  }
+}
+
+// ---- STAFF CRUD ----
+let _modalRole='', _modalEditId=null;
+
+function renderStaffList(role){
+  const list=getStaff(role);
+  const el=document.getElementById(role+'-list');
+  if(!list.length){
+    el.innerHTML='<div class="empty-state" style="padding:1.5rem">Belum ada '+( role==='physicist'?'fisikawan medis':'dokter onkologi')+' terdaftar.</div>';
+    return;
+  }
+  el.innerHTML='<table class="history-table"><thead><tr><th>Nama</th><th>Gelar / Spesialisasi</th><th>No. SIP</th><th style="text-align:right">Aksi</th></tr></thead><tbody>'+
+    list.map((p,i)=>`<tr>
+      <td style="font-weight:500">${p.name}</td>
+      <td style="color:var(--text-secondary)">${p.title||'—'}</td>
+      <td style="color:var(--text-secondary)">${p.sip||'—'}</td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="btn" style="font-size:11px;padding:3px 10px" onclick="openStaffModal('${role}','${p.id}')">Edit</button>
+        <button class="btn danger" style="font-size:11px;padding:3px 10px;margin-left:4px" onclick="deleteStaff('${role}','${p.id}')">Hapus</button>
+      </td></tr>`).join('')+'</tbody></table>';
+}
+
+function openStaffModal(role, id){
+  _modalRole=role; _modalEditId=id||null;
+  const label=role==='physicist'?'Fisikawan Medis':'Dokter Onkologi Radiasi';
+  document.getElementById('modal-title').textContent=(id?'Edit ':'Tambah ')+label;
+  if(id){
+    const p=getStaff(role).find(x=>x.id===id)||{};
+    document.getElementById('modal-name').value=p.name||'';
+    document.getElementById('modal-title-field').value=p.title||'';
+    document.getElementById('modal-sip').value=p.sip||'';
+  } else {
+    document.getElementById('modal-name').value='';
+    document.getElementById('modal-title-field').value='';
+    document.getElementById('modal-sip').value='';
+  }
+  const modal=document.getElementById('staff-modal');
+  modal.style.cssText='display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;align-items:center;justify-content:center';
+  setTimeout(()=>document.getElementById('modal-name').focus(),50);
+}
+function closeModal(){
+  document.getElementById('staff-modal').style.cssText='display:none';
+  _modalEditId=null;
+}
+// Enter key submits modal
+document.addEventListener('keydown',function(e){
+  const modal=document.getElementById('staff-modal');
+  if(modal.style.display==='flex'){
+    if(e.key==='Enter') saveStaff();
+    if(e.key==='Escape') closeModal();
+  }
+});
+// Backdrop click closes modal — use event delegation on document
+document.addEventListener('click',function(e){
+  if(e.target&&e.target.id==='staff-modal') closeModal();
+});
+
+function saveStaff(){
+  const name=document.getElementById('modal-name').value.trim();
+  if(!name){alert('Nama tidak boleh kosong.');return;}
+  const title=document.getElementById('modal-title-field').value.trim();
+  const sip=document.getElementById('modal-sip').value.trim();
+  let list=getStaff(_modalRole);
+  if(_modalEditId){
+    list=list.map(p=>p.id===_modalEditId?{...p,name,title,sip}:p);
+  } else {
+    list.push({id:'s'+Date.now(),name,title,sip});
+  }
+  saveStaffList(_modalRole,list);
+  closeModal();
+  renderStaffList(_modalRole);
+  refreshPrintSelects();
+}
+function deleteStaff(role,id){
+  if(!confirm('Hapus staf ini dari daftar?'))return;
+  saveStaffList(role, getStaff(role).filter(p=>p.id!==id));
+  renderStaffList(role);
+  refreshPrintSelects();
+}
+function refreshPrintSelects(){
+  refreshPrintDisplays();
+  ['physicist','oncologist'].forEach(role=>{
+    const selId=role==='physicist'?'s-ph':'s-oc';
+    const sel=document.getElementById(selId);
+    if(!sel)return;
+    const cur=sel.value;
+    const list=getStaff(role);
+    sel.innerHTML='<option value="">-- Pilih dari daftar --</option>'+
+      list.map(p=>`<option value="${p.id}"${p.id===cur?' selected':''}>${p.name}${p.title?' — '+p.title:''}</option>`).join('');
+  });
+}
+
+// ---- LIBUR LOKAL ----
+function getHolidays(){
+  const cfg=loadSettings();
+  return cfg.holidays||[];
+}
+function saveHolidays(list){
+  const cfg=loadSettings(); cfg.holidays=list; saveSettings(cfg);
+}
+function addHoliday(dateVal, label){
+  const cfg=loadSettings();
+  if(!cfg.holidays) cfg.holidays=[];
+  const d=dateVal||new Date().toISOString().slice(0,10);
+  const n=label||'Libur';
+  cfg.holidays.push({id:'h'+Date.now(), date:d, name:n});
+  cfg.holidays.sort((a,b)=>a.date.localeCompare(b.date));
+  saveSettings(cfg);
+  renderHolidayList();
+  autoFillEndDate();
+}
+function addNasionalHolidays(){
+  const yr=new Date().getFullYear();
+  const nat=[
+    {date:`${yr}-01-01`,name:'Tahun Baru Masehi'},
+    {date:`${yr}-02-12`,name:'Isra Mikraj'},
+    {date:`${yr}-03-29`,name:'Hari Raya Nyepi'},
+    {date:`${yr}-03-31`,name:'Wafat Isa Al Masih'},
+    {date:`${yr}-04-01`,name:'Hari Paskah'},
+    {date:`${yr}-05-01`,name:'Hari Buruh'},
+    {date:`${yr}-05-12`,name:'Kenaikan Isa Al Masih'},
+    {date:`${yr}-05-29`,name:'Kenaikan Isa Al Masih (cuti)'},
+    {date:`${yr}-06-01`,name:'Hari Lahir Pancasila'},
+    {date:`${yr}-06-06`,name:'Idul Adha'},
+    {date:`${yr}-06-27`,name:'Tahun Baru Islam'},
+    {date:`${yr}-08-17`,name:'Hari Kemerdekaan RI'},
+    {date:`${yr}-09-05`,name:'Maulid Nabi'},
+    {date:`${yr}-12-25`,name:'Hari Natal'},
+    {date:`${yr}-12-26`,name:'Hari Natal (cuti bersama)'},
+  ];
+  const cfg=loadSettings();
+  if(!cfg.holidays) cfg.holidays=[];
+  nat.forEach(h=>{
+    if(!cfg.holidays.find(x=>x.date===h.date)){
+      cfg.holidays.push({id:'h'+Date.now()+Math.random(),date:h.date,name:h.name});
+    }
+  });
+  cfg.holidays.sort((a,b)=>a.date.localeCompare(b.date));
+  saveSettings(cfg);
+  renderHolidayList();
+  autoFillEndDate();
+  alert('Libur nasional '+yr+' berhasil diimpor (duplikat dilewati).');
+}
+function deleteHoliday(id){
+  saveHolidays(getHolidays().filter(h=>h.id!==id));
+  renderHolidayList();
+  autoFillEndDate();
+}
+function clearHolidays(){
+  if(!confirm('Hapus semua hari libur?'))return;
+  saveHolidays([]);
+  renderHolidayList();
+  autoFillEndDate();
+}
+function updateHolidayField(id, field, val){
+  const list=getHolidays();
+  const h=list.find(x=>x.id===id);
+  if(h){ h[field]=val; }
+  list.sort((a,b)=>a.date.localeCompare(b.date));
+  saveHolidays(list);
+  autoFillEndDate();
+}
+function renderHolidayList(){
+  const list=getHolidays();
+  const el=document.getElementById('holiday-list-settings');
+  if(!el) return;
+  if(!list.length){
+    el.innerHTML='<div class="empty-state" style="padding:1rem 0;text-align:left;color:var(--text-tertiary);font-size:13px;font-family:sans-serif">Belum ada libur lokal ditambahkan.</div>';
+    return;
+  }
+  el.innerHTML='<div style="display:flex;flex-direction:column;gap:6px">'+
+    list.map(h=>`
+      <div style="display:flex;align-items:center;gap:8px;font-family:sans-serif;font-size:13px;flex-wrap:wrap">
+        <input type="date" value="${h.date}" onchange="updateHolidayField('${h.id}','date',this.value)"
+          style="font-size:13px;padding:6px 8px;border-radius:var(--radius-md);border:0.5px solid var(--border-secondary);background:var(--bg-secondary);color:var(--text-primary);width:155px">
+        <input type="text" value="${h.name}" onchange="updateHolidayField('${h.id}','name',this.value)"
+          placeholder="Keterangan libur" style="font-size:13px;padding:6px 8px;border-radius:var(--radius-md);border:0.5px solid var(--border-secondary);background:var(--bg-secondary);color:var(--text-primary);flex:1;min-width:140px">
+        <button class="rm-btn" onclick="deleteHoliday('${h.id}')">✕</button>
+      </div>`).join('')+'</div>';
+}
+
+// ---- AUTO-FILL TANGGAL SELESAI RT ----
+function isWeekend(d){
+  const day=d.getDay(); return day===0||day===6;
+}
+function isHoliday(d, holidaySet){
+  return holidaySet.has(d.toISOString().slice(0,10));
+}
+function isTreatmentDay(d, holidaySet, fracPerWeek){
+  // fracPerWeek 5 = Senin-Jumat, 6 = Senin-Sabtu, 7 = semua hari
+  const day=d.getDay(); // 0=Sun,1=Mon,...,6=Sat
+  if(fracPerWeek<=5 && (day===0||day===6)) return false;
+  if(fracPerWeek===6 && day===0) return false;
+  if(isHoliday(d, holidaySet)) return false;
+  return true;
+}
+function autoFillEndDate(){
+  const ts=document.getElementById('p-ts').value;
+  const n=parseInt(document.getElementById('p-n').value)||0;
+  const fw=parseInt(document.getElementById('p-fw').value)||5;
+  const hintEl=document.getElementById('p-te-hint');
+  const infoEl=document.getElementById('ott-schedule-info');
+  const teEl=document.getElementById('p-te');
+
+  if(!ts||n<=0){
+    teEl.value=''; if(hintEl) hintEl.textContent=''; if(infoEl) infoEl.style.display='none'; return;
+  }
+
+  const holidays=getHolidays();
+  const holidaySet=new Set(holidays.map(h=>h.date));
+  const fwClamped=Math.min(Math.max(fw,1),7);
+
+  let cur=new Date(ts+'T00:00:00');
+  let fracDone=0;
+  let calDays=0;
+  let skippedWeekend=0, skippedHoliday=0;
+  const skippedHolidayNames=[];
+  const MAX_ITER=1000; let iter=0;
+
+  // Start date itself: if it's not a treatment day, find first valid
+  while(!isTreatmentDay(cur, holidaySet, fwClamped) && iter<MAX_ITER){
+    if(isWeekend(cur)) skippedWeekend++;
+    else if(isHoliday(cur, holidaySet)){
+      skippedHoliday++;
+      const hd=holidays.find(h=>h.date===cur.toISOString().slice(0,10));
+      if(hd&&!skippedHolidayNames.includes(hd.name)) skippedHolidayNames.push(hd.name);
+    }
+    cur.setDate(cur.getDate()+1); iter++;
+  }
+  // Count fractions from start date
+  const realStart=new Date(cur);
+  iter=0;
+  while(fracDone<n && iter<MAX_ITER){
+    if(isTreatmentDay(cur, holidaySet, fwClamped)){
+      fracDone++;
+      if(fracDone===n) break;
+    } else {
+      if(isWeekend(cur)) skippedWeekend++;
+      else if(isHoliday(cur, holidaySet)){
+        skippedHoliday++;
+        const hd=holidays.find(h=>h.date===cur.toISOString().slice(0,10));
+        if(hd&&!skippedHolidayNames.includes(hd.name)) skippedHolidayNames.push(hd.name);
+      }
+    }
+    cur.setDate(cur.getDate()+1); iter++;
+  }
+
+  const endDate=cur.toISOString().slice(0,10);
+  calDays=Math.round((cur-realStart)/86400000)+1;
+  teEl.value=endDate;
+
+  if(hintEl) hintEl.textContent=`Dihitung otomatis — ${n} fraksi dalam ${calDays} hari kalender`;
+
+  // Build info box
+  if(infoEl){
+    const wd=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const fmt=d=>new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+    let holidayNote=skippedHolidayNames.length
+      ? '<br>Libur dilewati: <strong>'+skippedHolidayNames.join(', ')+'</strong>'
+      : '';
+    infoEl.innerHTML=
+      `<strong>Mulai RT:</strong> ${fmt(ts)} (${wd[new Date(ts+'T00:00:00').getDay()]}) &nbsp;|&nbsp; `+
+      `<strong>Selesai RT:</strong> ${fmt(endDate)} (${wd[cur.getDay()]}) &nbsp;|&nbsp; `+
+      `<strong>OTT:</strong> ${calDays} hari kalender<br>`+
+      `Sesi RT: <strong>${n} fraksi</strong> &nbsp;|&nbsp; Akhir pekan dilewati: <strong>${skippedWeekend} hari</strong>`+
+      (skippedHoliday>0?` &nbsp;|&nbsp; Libur khusus dilewati: <strong>${skippedHoliday} hari</strong>`:'')+
+      holidayNote;
+    infoEl.style.display='block';
+  }
+}
+function calculate(){
+  const d=v('p-d'),n=v('p-n'),abt=v('p-abt'),abo=v('p-abo'),fw=v('p-fw')||5,dp=v('p-dp')||0.6;
+  if(!d||!n||!abt||!abo){alert('Lengkapi parameter fraksinasi dan α/β.');return;}
+  const D=d*n;
+  const BEDt=n*d*(1+d/abt), BEDo=n*d*(1+d/abo);
+  const EQD2t=BEDt/(1+2/abt), EQD2o=BEDo/(1+2/abo);
+  let OTT=0,BEDott=BEDt;
+  const ts=s('p-ts'),te=s('p-te');
+  if(ts&&te){OTT=Math.round((new Date(te)-new Date(ts))/86400000)+1;}
+  else{OTT=Math.ceil(n/fw*7);}
+  BEDott=BEDt-dp*OTT;
+
+  document.getElementById('r-D').textContent=D.toFixed(1)+' Gy ('+n+' fx × '+d+' Gy)';
+  document.getElementById('r-bt').textContent=BEDt.toFixed(2);
+  document.getElementById('r-bo').textContent=BEDo.toFixed(2);
+  document.getElementById('r-et').textContent=EQD2t.toFixed(2);
+  document.getElementById('r-eo').textContent=EQD2o.toFixed(2);
+  document.getElementById('r-ott').textContent=OTT;
+  document.getElementById('r-bott').textContent=BEDott.toFixed(2);
+
+  let note=d>2?'Hipofraksinasi (d > 2 Gy): efisien untuk tumor α/β rendah. ':d<2?'Hiperfraksinasi (d < 2 Gy): sparing jaringan late lebih baik. ':'Fraksinasi konvensional (2 Gy/fx). ';
+  if(EQD2o>60) note+='⚠ EQD2 OAR > 60 Gy — perhatikan toleransi jaringan sehat.';
+  document.getElementById('r-note').textContent=note;
+  document.getElementById('results-section').style.display='';
+
+  lastCalc={patient:{name:s('pt-name'),rm:s('pt-rm'),cancer:s('pt-cancer'),date:s('pt-date'),modality:s('pt-modality')},params:{d,n,abt,abo,fw,dp,ts,te},results:{D,BEDt,BEDo,EQD2t,EQD2o,OTT,BEDott}};
+}
+
+// ---- INTERRUPT DAYS ----
+function renderDayList(){
+  const el=document.getElementById('day-list');
+  const badge=document.getElementById('int-badge');
+  const countLabel=document.getElementById('day-count-label');
+  if(badge) badge.style.display=interruptDays.length?'':'none';
+  if(countLabel) countLabel.textContent=interruptDays.length?`${interruptDays.length} hari terdaftar`:'';
+
+  if(!interruptDays.length){
+    el.innerHTML='<div style="font-family:sans-serif;font-size:13px;color:var(--text-tertiary);padding:8px 0">Belum ada hari interupsi.</div>';
+    return;
+  }
+
+  // Sort before rendering
+  interruptDays.sort((a,b)=>a.date.localeCompare(b.date));
+
+  // Group consecutive dates for visual clarity
+  const grouped=[];
+  let grp=null;
+  interruptDays.forEach((item,i)=>{
+    const prev=i>0?interruptDays[i-1]:null;
+    const isConsec=prev&&dayDiff(prev.date,item.date)===1&&prev.alasan===item.alasan;
+    if(isConsec){ grp.items.push(item); grp.toDate=item.date; }
+    else { grp={items:[item],fromDate:item.date,toDate:item.date,alasan:item.alasan}; grouped.push(grp); }
+  });
+
+  el.innerHTML=grouped.map((grp,gi)=>{
+    const isRange=grp.items.length>1;
+    const idxStart=interruptDays.indexOf(grp.items[0]);
+    const idxEnd=interruptDays.indexOf(grp.items[grp.items.length-1]);
+    if(isRange){
+      return `<div style="border:0.5px solid var(--red-100);border-radius:var(--radius-md);background:var(--red-50);padding:8px 12px;margin-bottom:4px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:sans-serif;font-size:13px">
+          <span style="font-size:11px;background:var(--red-600);color:white;border-radius:4px;padding:2px 8px;flex-shrink:0">${grp.items.length} hari</span>
+          <span style="color:var(--red-800);font-weight:500">${fmt(grp.fromDate)} → ${fmt(grp.toDate)}</span>
+          <span style="color:var(--red-600);font-size:12px">${grp.alasan}</span>
+          <div style="margin-left:auto;display:flex;gap:6px">
+            <select style="font-size:11px;padding:3px 6px;border-radius:var(--radius-md);border:0.5px solid var(--border-secondary);background:var(--bg-secondary);color:var(--text-primary)" onchange="updateRangeAlasan(${idxStart},${idxEnd},this.value)">
+              ${ALASAN.map(a=>`<option${a===grp.alasan?' selected':''}>${a}</option>`).join('')}
+            </select>
+            <button class="rm-btn" onclick="removeDayRange(${idxStart},${idxEnd})">✕ Hapus Rentang</button>
+          </div>
+        </div>
+      </div>`;
+    } else {
+      const i=idxStart;
+      return `<div class="day-item">
+        <span style="font-size:12px;color:var(--text-tertiary);min-width:22px;text-align:right">${i+1}.</span>
+        <input type="date" value="${grp.items[0].date}" onchange="interruptDays[${i}].date=this.value;interruptDays.sort((a,b)=>a.date.localeCompare(b.date));renderDayList()">
+        <select onchange="interruptDays[${i}].alasan=this.value">
+          ${ALASAN.map(a=>`<option${a===grp.items[0].alasan?' selected':''}>${a}</option>`).join('')}
+        </select>
+        <button class="rm-btn" onclick="removeDay(${i})">✕</button>
+      </div>`;
+    }
+  }).join('');
+}
+
+function dayDiff(d1,d2){
+  return Math.round((new Date(d2+'T00:00:00')-new Date(d1+'T00:00:00'))/86400000);
+}
+function fmt(ds){
+  return new Date(ds+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
+}
+
+function addDay(){
+  const today=new Date().toISOString().slice(0,10);
+  interruptDays.push({date:today,alasan:ALASAN[0]});
+  renderDayList();
+}
+
+function removeDay(i){
+  interruptDays.splice(i,1);
+  renderDayList();
+}
+
+function removeDayRange(fromIdx,toIdx){
+  interruptDays.splice(fromIdx, toIdx-fromIdx+1);
+  renderDayList();
+}
+
+function updateRangeAlasan(fromIdx,toIdx,newAlasan){
+  for(let i=fromIdx;i<=toIdx;i++) interruptDays[i].alasan=newAlasan;
+  renderDayList();
+}
+
+function clearDays(){
+  interruptDays=[];
+  renderDayList();
+  document.getElementById('int-results').style.display='none';
+  const rp=document.getElementById('range-preview');
+  if(rp) rp.textContent='';
+}
+
+// -- Range input live preview --
+function setupRangePreview(){
+  // Populate alasan dropdown
+  const ra=document.getElementById('range-alasan');
+  if(ra&&!ra.options.length) ra.innerHTML=ALASAN.map(a=>`<option>${a}</option>`).join('');
+  ['range-from','range-to','range-mode'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.addEventListener('change', updateRangePreview);
+  });
+}
+
+function updateRangePreview(){
+  const from=document.getElementById('range-from').value;
+  const to=document.getElementById('range-to').value;
+  const mode=document.getElementById('range-mode').value;
+  const prev=document.getElementById('range-preview');
+  if(!prev) return;
+  if(!from||!to){ prev.textContent=''; return; }
+  const d1=new Date(from+'T00:00:00'), d2=new Date(to+'T00:00:00');
+  if(d2<d1){ prev.textContent='⚠ Tanggal akhir harus setelah tanggal mulai.'; return; }
+  const days=buildRangeDays(from,to,mode);
+  prev.textContent=`→ ${days.length} hari akan ditambahkan (${mode==='treatment'?'hari sinar saja, weekend & libur dilewati':'semua hari kalender'})`;
+}
+
+function buildRangeDays(from,to,mode){
+  const holidays=getHolidays();
+  const holidaySet=new Set(holidays.map(h=>h.date));
+  const days=[];
+  let cur=new Date(from+'T00:00:00');
+  const end=new Date(to+'T00:00:00');
+  const fw=lastCalc?lastCalc.params.fw:5;
+  while(cur<=end){
+    const ds=cur.toISOString().slice(0,10);
+    if(mode==='all' || isTreatmentDay(cur,holidaySet,fw)) days.push(ds);
+    cur.setDate(cur.getDate()+1);
+  }
+  return days;
+}
+
+function addDayRange(){
+  const from=document.getElementById('range-from').value;
+  const to=document.getElementById('range-to').value;
+  const alasan=document.getElementById('range-alasan').value;
+  const mode=document.getElementById('range-mode').value;
+  if(!from||!to){alert('Isi tanggal mulai dan tanggal akhir.');return;}
+  const d1=new Date(from+'T00:00:00'), d2=new Date(to+'T00:00:00');
+  if(d2<d1){alert('Tanggal akhir harus setelah tanggal mulai.');return;}
+  const days=buildRangeDays(from,to,mode);
+  if(!days.length){alert('Tidak ada hari sinar dalam rentang tersebut (semua akhir pekan/libur).');return;}
+  // Add only dates not already in list
+  const existing=new Set(interruptDays.map(x=>x.date));
+  let added=0;
+  days.forEach(ds=>{ if(!existing.has(ds)){interruptDays.push({date:ds,alasan});added++;} });
+  renderDayList();
+  const prev=document.getElementById('range-preview');
+  if(prev) prev.textContent=`✓ ${added} hari ditambahkan${days.length-added>0?' ('+( days.length-added)+' hari sudah ada, dilewati)':''}.`;
+  // Clear range inputs
+  document.getElementById('range-from').value='';
+  document.getElementById('range-to').value='';
+}
+
+// ---- HITUNG KOMPENSASI ----
+function calcInterrupt(){
+  if(!lastCalc){alert('Lakukan kalkulasi rencana terlebih dahulu di tab Kalkulator.');showTab('calc');return;}
+  if(!interruptDays.length){alert('Tambahkan minimal satu hari interupsi.');return;}
+
+  const {d,n,abt,abo,dp,fw,ts,te}=lastCalc.params;
+  const {BEDt,BEDo,EQD2t,EQD2o,OTT}=lastCalc.results;
+
+  const sorted=[...interruptDays].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const uniqueDates=[...new Set(sorted.map(x=>x.date))];
+  const totalDays=uniqueDates.length;
+
+  const BED_lost=dp*totalDays;
+  const BED_eff=BEDt-BED_lost;
+  const EQD2_eff=BED_eff/(1+2/abt);
+  const OTT_act=OTT+totalDays;
+  const OTT_def=totalDays;
+
+  const compDInput=v('c-d');
+  const d_comp=compDInput>0?compDInput:d;
+  const oar_lim=v('c-oarlimit')||60;
+
+  const BED_per_fx_comp_t=d_comp*(1+d_comp/abt);
+  const BED_per_fx_comp_o=d_comp*(1+d_comp/abo);
+
+  const n_extra=Math.ceil(BED_lost/BED_per_fx_comp_t);
+  const d_extra_total=n_extra*d_comp;
+  const BED_fin=BEDt+(n_extra*BED_per_fx_comp_t)-BED_lost;
+  const EQD2_fin=BED_fin/(1+2/abt);
+  const BED_oar_new=BEDo+(n_extra*BED_per_fx_comp_o);
+  const EQD2_oar_new=BED_oar_new/(1+2/abo);
+  const oar_safe=EQD2_oar_new<=oar_lim;
+
+  document.getElementById('i-days').textContent=totalDays;
+  document.getElementById('i-blost').textContent=BED_lost.toFixed(2);
+  document.getElementById('i-beff').textContent=BED_eff.toFixed(2);
+  document.getElementById('i-eeff').textContent=EQD2_eff.toFixed(2);
+  document.getElementById('i-ott-act').textContent=OTT_act;
+  document.getElementById('i-ottdef').textContent='+'+OTT_def;
+  document.getElementById('i-nex').textContent=n_extra;
+  document.getElementById('i-dex').textContent=d_comp.toFixed(2);
+  document.getElementById('i-dtot').textContent=d_extra_total.toFixed(2);
+  document.getElementById('i-bfin').textContent=BED_fin.toFixed(2);
+  document.getElementById('i-efin').textContent=EQD2_fin.toFixed(2);
+  document.getElementById('i-eoar').textContent=EQD2_oar_new.toFixed(2);
+
+  const oc=document.getElementById('i-oar-card');
+  oc.className='rc '+(oar_safe?'ok':'dng');
+  document.getElementById('i-oar-v').textContent=oar_safe?'AMAN':'MELEBIHI';
+  document.getElementById('i-oar-u').textContent=oar_safe?'Dalam batas toleransi':'Konsultasi dokter onkologi';
+
+  let note=`Interupsi ${totalDays} hari → BED hilang ${BED_lost.toFixed(2)} Gy. Diperlukan ${n_extra} fraksi tambahan (${d_comp} Gy/fx, total ${d_extra_total.toFixed(2)} Gy) untuk mencapai BED target. `;
+  if(totalDays>=5) note='⚠ Interupsi ≥5 hari berdampak signifikan pada kontrol lokal. '+note;
+  if(!oar_safe) note+=`⛔ EQD2 OAR (${EQD2_oar_new.toFixed(2)} Gy) melebihi batas (${oar_lim} Gy). Pertimbangkan kompensasi parsial atau kurangi dosis kompensasi.`;
+  else note+=`EQD2 OAR aman: ${EQD2_oar_new.toFixed(2)} Gy ≤ ${oar_lim} Gy.`;
+  const nel=document.getElementById('i-note');
+  nel.textContent=note;
+  nel.className='note'+(oar_safe?'':' red');
+
+  // Detail table
+  document.getElementById('i-detail').innerHTML=sorted.map((item,i)=>{
+    const fracEst=ts?Math.max(0,Math.round((new Date(item.date)-new Date(ts))/86400000*(fw/5))):'-';
+    return `<tr>
+      <td>${i+1}</td><td>${item.date}</td><td>${item.alasan}</td>
+      <td>${fracEst!=='-'?'Setelah fraksi ke-'+fracEst:'—'}</td>
+      <td>${dp.toFixed(2)}</td>
+      <td style="color:var(--red-600);font-weight:500">${dp.toFixed(2)}</td>
+    </tr>`;
+  }).join('');
+
+  lastInt={days:sorted,totalDays,BED_lost,BED_eff,EQD2_eff,OTT_act,OTT_def,n_extra,d_comp,d_extra_total,BED_fin,EQD2_fin,EQD2_oar_new,oar_safe,oar_lim};
+  document.getElementById('int-results').style.display='';
+}
+
+// ---- RIWAYAT ----
+function saveToHistory(){
+  if(!lastCalc){alert('Hitung dulu sebelum menyimpan.');return;}
+  let hist=[];
+  try{hist=JSON.parse(localStorage.getItem('radiobio_v2')||'[]');}catch(e){}
+  const entry={...lastCalc,id:Date.now()};
+  if(lastInt) entry.interrupt=lastInt;
+  hist.unshift(entry);
+  if(hist.length>50) hist=hist.slice(0,50);
+  localStorage.setItem('radiobio_v2',JSON.stringify(hist));
+  alert('Data pasien berhasil disimpan.');
+  renderHistory();
+}
+
+function renderHistory(){
+  let hist=[];
+  try{hist=JSON.parse(localStorage.getItem('radiobio_v2')||'[]');}catch(e){}
+  const el=document.getElementById('history-content');
+  if(!hist.length){el.innerHTML='<div class="empty-state">Belum ada data tersimpan.</div>';return;}
+  el.innerHTML='<div class="ow"><table class="history-table"><thead><tr><th>Tgl</th><th>Nama</th><th>RM</th><th>Diagnosis</th><th>BED Tumor</th><th>EQD2</th><th>OTT</th><th>Interupsi</th><th>Aksi</th></tr></thead><tbody>'+
+    hist.map((h,i)=>`<tr>
+      <td>${h.patient.date||new Date(h.id).toLocaleDateString('id-ID')}</td>
+      <td>${h.patient.name||'-'}</td><td>${h.patient.rm||'-'}</td><td>${h.patient.cancer||'-'}</td>
+      <td>${h.results.BEDt.toFixed(2)} Gy</td><td>${h.results.EQD2t.toFixed(2)} Gy</td><td>${h.results.OTT} hr</td>
+      <td>${h.interrupt?`<span style="color:var(--red-600);font-weight:500">${h.interrupt.totalDays} hari / +${h.interrupt.n_extra} fx</span>`:'<span style="color:var(--text-tertiary)">—</span>'}</td>
+      <td style="white-space:nowrap">
+        <button class="btn" style="font-size:11px;padding:3px 10px" onclick="loadHistory(${i})">Muat</button>
+        <button class="btn danger" style="font-size:11px;padding:3px 10px;margin-left:4px" onclick="deleteHistory(${i})">Hapus</button>
+      </td></tr>`).join('')+'</tbody></table></div>';
+}
+
+function loadHistory(idx){
+  let hist=[];
+  try{hist=JSON.parse(localStorage.getItem('radiobio_v2')||'[]');}catch(e){}
+  const h=hist[idx];if(!h)return;
+  lastCalc=h;
+  document.getElementById('pt-name').value=h.patient.name||'';
+  document.getElementById('pt-rm').value=h.patient.rm||'';
+  document.getElementById('pt-cancer').value=h.patient.cancer||'';
+  document.getElementById('pt-date').value=h.patient.date||'';
+  document.getElementById('pt-modality').value=h.patient.modality||'';
+  document.getElementById('p-d').value=h.params.d;
+  document.getElementById('p-n').value=h.params.n;
+  document.getElementById('p-fw').value=h.params.fw;
+  document.getElementById('p-abt').value=h.params.abt;
+  document.getElementById('p-abo').value=h.params.abo;
+  document.getElementById('p-dp').value=h.params.dp;
+  document.getElementById('p-ts').value=h.params.ts||'';
+  document.getElementById('p-te').value=h.params.te||'';
+  if(h.interrupt){interruptDays=h.interrupt.days.map(x=>({date:x.date,alasan:x.alasan}));lastInt=h.interrupt;renderDayList();}
+  showTab('calc'); calculate(); autoFillEndDate();
+}
+
+function deleteHistory(idx){
+  let hist=[];
+  try{hist=JSON.parse(localStorage.getItem('radiobio_v2')||'[]');}catch(e){}
+  hist.splice(idx,1);localStorage.setItem('radiobio_v2',JSON.stringify(hist));renderHistory();
+}
+
+function clearHistory(){if(!confirm('Hapus semua riwayat?'))return;localStorage.removeItem('radiobio_v2');renderHistory();}
+
+function resetForm(){
+  ['pt-name','pt-rm','pt-date','p-ts','p-te'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pt-cancer').value='';
+  document.getElementById('p-d').value=2;document.getElementById('p-n').value=25;
+  document.getElementById('p-fw').value=5;document.getElementById('p-abt').value=10;
+  document.getElementById('p-abo').value=3;document.getElementById('p-dp').value=0.6;
+  document.getElementById('results-section').style.display='none';
+  document.getElementById('ott-schedule-info').style.display='none';
+  if(document.getElementById('p-te-hint')) document.getElementById('p-te-hint').textContent='';
+  lastCalc=null;clearDays();lastInt=null;
+}
+
+// ---- CETAK ----
+function generatePrint(){
+  if(!lastCalc){alert('Lakukan kalkulasi terlebih dahulu.');showTab('calc');return;}
+  const r=lastCalc.results,p=lastCalc.patient,pm=lastCalc.params;
+
+  // Get institution from settings
+  const cfg=loadSettings();
+  const inst=cfg.inst||'____________________';
+  const dept=cfg.dept||'Departemen Radioterapi';
+  const addr=cfg.addr||'';
+  const contact=cfg.contact||'';
+
+  // Get selected staff — with full details
+  const phId=document.getElementById('s-ph').value;
+  const ocId=document.getElementById('s-oc').value;
+  const phObj=getStaff('physicist').find(x=>x.id===phId)||null;
+  const ocObj=getStaff('oncologist').find(x=>x.id===ocId)||null;
+  const phName=phObj?phObj.name:'____________________';
+  const phTitle=phObj&&phObj.title?phObj.title:'Fisikawan Medis';
+  const phSip=phObj&&phObj.sip?phObj.sip:'';
+  const ocName=ocObj?ocObj.name:'____________________';
+  const ocTitle=ocObj&&ocObj.title?ocObj.title:'Dokter Onkologi Radiasi';
+  const ocSip=ocObj&&ocObj.sip?ocObj.sip:'';
+
+  const today=new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+
+  let intSec='';
+  if(lastInt&&lastInt.totalDays>0){
+    const ir=lastInt;
+    intSec=`
+    <div class="ds"><div class="dst" style="color:#A32D2D">Analisis Gangguan Hari Sinar (Day Interruption)</div>
+    <table><tbody>
+      <tr><td>Total Hari Interupsi</td><td>: <b style="color:#A32D2D">${ir.totalDays} hari</b></td></tr>
+      <tr><td>BED Hilang (Proliferasi Tumor)</td><td>: ${ir.BED_lost.toFixed(3)} Gy</td></tr>
+      <tr><td>BED Efektif (setelah interupsi)</td><td>: ${ir.BED_eff.toFixed(3)} Gy</td></tr>
+      <tr><td>EQD2 Efektif (setelah interupsi)</td><td>: ${ir.EQD2_eff.toFixed(3)} Gy</td></tr>
+      <tr><td>OTT Aktual (prediksi)</td><td>: ${ir.OTT_act} hari (+${ir.OTT_def} dari rencana)</td></tr>
+    </tbody></table></div>
+    <div class="ds"><div class="dst" style="color:#3B6D11">Rekomendasi Kompensasi</div>
+    <table><tbody>
+      <tr><td><b>Tambahan Fraksi</b></td><td>: <b style="color:#3B6D11">${ir.n_extra} fraksi</b></td></tr>
+      <tr><td><b>Dosis per Fraksi Kompensasi</b></td><td>: <b>${ir.d_comp} Gy/fraksi</b></td></tr>
+      <tr><td><b>Total Dosis Kompensasi</b></td><td>: <b>${ir.d_extra_total.toFixed(2)} Gy</b></td></tr>
+      <tr><td><b>BED Final (setelah kompensasi)</b></td><td>: <b>${ir.BED_fin.toFixed(3)} Gy</b></td></tr>
+      <tr><td><b>EQD2 Final</b></td><td>: <b>${ir.EQD2_fin.toFixed(3)} Gy</b></td></tr>
+      <tr><td><b>EQD2 OAR Baru</b></td><td>: <b>${ir.EQD2_oar_new.toFixed(3)} Gy</b></td></tr>
+      <tr><td><b>Status OAR</b></td><td>: <b style="color:${ir.oar_safe?'#3B6D11':'#A32D2D'}">${ir.oar_safe?'AMAN (≤ '+ir.oar_lim+' Gy)':'⛔ MELEBIHI '+ir.oar_lim+' Gy — konsultasi dokter'}</b></td></tr>
+    </tbody></table></div>
+    <div class="ds"><div class="dst">Rincian Hari Interupsi</div>
+    <table style="font-size:11px"><thead><tr style="border-bottom:1px solid #ccc"><th style="padding:3px 6px;text-align:left">No</th><th style="padding:3px 6px;text-align:left">Tanggal</th><th style="padding:3px 6px;text-align:left">Alasan</th><th style="padding:3px 6px;text-align:right">BED Hilang</th></tr></thead>
+    <tbody>${ir.days.map((d2,i)=>`<tr><td style="padding:3px 6px">${i+1}</td><td style="padding:3px 6px">${d2.date}</td><td style="padding:3px 6px">${d2.alasan}</td><td style="padding:3px 6px;text-align:right;color:#A32D2D">${pm.dp.toFixed(2)} Gy</td></tr>`).join('')}
+    <tr style="border-top:1px solid #ccc;font-weight:bold"><td colspan="3" style="padding:4px 6px">Total</td><td style="padding:4px 6px;text-align:right;color:#A32D2D">${ir.BED_lost.toFixed(2)} Gy</td></tr>
+    </tbody></table></div>`;
+  }
+
+  document.getElementById('print-doc-content').innerHTML=`
+    <div class="dh">
+      <div style="font-size:13px;font-weight:bold;margin-bottom:2px">${inst}</div>
+      <div style="font-size:11px;color:#555;margin-bottom:2px">${dept}</div>
+      ${addr?`<div style="font-size:10px;color:#777">${addr}${contact?' | '+contact:''}</div>`:''}
+      <div style="margin-top:10px;margin-bottom:2px;font-size:16px;font-weight:bold">LEMBAR KALKULASI RADIOBIOLOGI</div>
+      <div style="font-size:11px;color:#555">Linear-Quadratic Model · BED · EQD2 · OTT · Day Interruption</div>
+    </div>
+    <div class="ds"><div class="dst">Data Identitas Pasien</div>
+    <table><tbody>
+      <tr><td>Nama Pasien</td><td>: ${p.name||'—'}</td></tr>
+      <tr><td>Nomor Rekam Medis</td><td>: ${p.rm||'—'}</td></tr>
+      <tr><td>Diagnosis / Jenis Kanker</td><td>: ${p.cancer||'—'}</td></tr>
+      <tr><td>Tanggal Kalkulasi</td><td>: ${p.date||today}</td></tr>
+      <tr><td>Modalitas Terapi</td><td>: ${p.modality||'—'}</td></tr>
+    </tbody></table></div>
+    <div class="ds"><div class="dst">Parameter Fraksinasi (Rencana)</div>
+    <table><tbody>
+      <tr><td>Dosis per Fraksi (d)</td><td>: ${pm.d} Gy/fraksi</td></tr>
+      <tr><td>Jumlah Fraksi (n)</td><td>: ${pm.n} fraksi</td></tr>
+      <tr><td>Dosis Total</td><td>: ${r.D.toFixed(1)} Gy</td></tr>
+      <tr><td>Fraksi per Minggu</td><td>: ${pm.fw} fraksi/minggu</td></tr>
+      <tr><td>Tanggal Mulai RT</td><td>: ${pm.ts||'—'}</td></tr>
+      <tr><td>Tanggal Selesai RT (Rencana)</td><td>: ${pm.te||'—'}</td></tr>
+      <tr><td>α/β Tumor</td><td>: ${pm.abt} Gy</td></tr>
+      <tr><td>α/β OAR</td><td>: ${pm.abo} Gy</td></tr>
+      <tr><td>Dprolif</td><td>: ${pm.dp} Gy/hari</td></tr>
+    </tbody></table></div>
+    <div class="ds"><div class="dst">Hasil Kalkulasi LQ Model (Tanpa Interupsi)</div>
+    <table><tbody>
+      <tr><td>BED Tumor</td><td>: ${r.BEDt.toFixed(3)} Gy</td></tr>
+      <tr><td>BED OAR</td><td>: ${r.BEDo.toFixed(3)} Gy</td></tr>
+      <tr><td>EQD2 Tumor</td><td>: ${r.EQD2t.toFixed(3)} Gy</td></tr>
+      <tr><td>EQD2 OAR</td><td>: ${r.EQD2o.toFixed(3)} Gy</td></tr>
+      <tr><td>OTT Rencana</td><td>: ${r.OTT} hari</td></tr>
+      <tr><td>BED Terkoreksi OTT</td><td>: ${r.BEDott.toFixed(3)} Gy</td></tr>
+    </tbody></table></div>
+    ${intSec}
+    <div class="ds"><div class="dst">Formula yang Digunakan</div>
+    <div style="font-size:11px;color:#444;line-height:2;font-family:monospace;background:#f5f5f5;padding:10px;border-radius:4px">
+      BED = n × d × (1 + d / (α/β))<br>
+      EQD2 = BED / (1 + 2 / (α/β))<br>
+      BED_OTT = BED − Dprolif × T<br>
+      BED_hilang = Dprolif × Σ(hari interupsi)<br>
+      n_ekstra = ⌈BED_hilang / (d_komp × (1 + d_komp / (α/β_tumor)))⌉
+    </div></div>
+    <div class="sig-row">
+      <div class="sig-block">
+        <div style="font-size:12px;color:#555">${today}</div>
+        <div class="sig-line">${phName}</div>
+        <div class="sig-title">${phTitle}</div>
+        ${phSip?`<div class="sig-title">SIP: ${phSip}</div>`:''}
+      </div>
+      <div class="sig-block">
+        <div style="font-size:12px;color:#555">${today}</div>
+        <div class="sig-line">${ocName}</div>
+        <div class="sig-title">${ocTitle}</div>
+        ${ocSip?`<div class="sig-title">SIP: ${ocSip}</div>`:''}
+      </div>
+    </div>
+    <div style="margin-top:24px;padding-top:10px;border-top:0.5px solid #ccc;font-size:10px;color:#888;text-align:center">
+      Dokumen dibuat menggunakan Aplikasi Kalkulasi Radiobiologi Klinik — LQ Model · Day Interruption.<br>
+      Hanya sebagai dokumen pendukung klinis. Tidak menggantikan keputusan medis profesional.
+    </div>`;
+  document.getElementById('print-area').style.display='';
+}
+
+function printDoc(){
+  generatePrint();
+  const content=document.getElementById('print-doc-content').innerHTML;
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Laporan Radiobiologi</title>
+  <style>
+    body{font-family:'Times New Roman',serif;margin:0;padding:0;background:#fff;color:#222}
+    .print-doc{max-width:700px;margin:0 auto;padding:40px 48px;font-size:13px;line-height:1.6}
+    .dh{text-align:center;border-bottom:2px solid #222;padding-bottom:10px;margin-bottom:16px}
+    .ds{margin-bottom:14px}.dst{font-weight:bold;font-size:12px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #999;padding-bottom:3px;margin-bottom:8px}
+    table{width:100%;border-collapse:collapse}
+    td{padding:4px 8px;font-size:12px}td:first-child{color:#555;width:50%}td:last-child{font-weight:500}
+    th{padding:4px 6px;font-size:11px;text-align:left}
+    .sig-row{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:32px}
+    .sig-block{text-align:center}.sig-line{border-top:1px solid #333;padding-top:6px;margin-top:60px;font-size:12px;font-weight:500}
+    .sig-title{font-size:11px;color:#555;margin-top:2px}
+    @media print{body{-webkit-print-color-adjust:exact}}
+  </style></head><body><div class="print-doc">${content}</div></body></html>`);
+  win.document.close();
+  setTimeout(()=>{win.focus();win.print();},400);
+}
+
+// ---- REFERENSI ----
+function renderRef(){
+  document.getElementById('ref-table').innerHTML=REF.map(r=>
+    `<tr><td>${r[0]}</td><td style="font-weight:500">${r[1]}</td>
+    <td><span style="font-size:11px;padding:2px 8px;border-radius:4px;background:${r[2]==='Tumor'?'#E1F5EE':'#FAEEDA'};color:${r[2]==='Tumor'?'#0F6E56':'#854F0B'}">${r[2]}</span></td>
+    <td style="color:var(--text-secondary)">${r[3]}</td></tr>`).join('');
+  document.getElementById('tol-table').innerHTML=TOL.map(r=>
+    `<tr><td>${r[0]}</td><td style="font-weight:500">${r[1]}</td><td style="color:var(--text-secondary)">${r[2]}</td></tr>`).join('');
+}
+
+// ---- BACKUP & RESTORE ----
+function exportData(){
+  const payload={
+    version:2,
+    exported:new Date().toISOString(),
+    settings:loadSettings(),
+    history:JSON.parse(localStorage.getItem('radiobio_v2')||'[]')
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const date=new Date().toISOString().slice(0,10);
+  a.href=url; a.download='radiobiologi-backup-'+date+'.json';
+  a.click(); URL.revokeObjectURL(url);
+}
+function importData(e){
+  const file=e.target.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(!data.settings&&!data.history) throw new Error('Format tidak dikenal');
+      if(!confirm('Impor akan mengganti semua data yang ada sekarang. Lanjutkan?'))return;
+      if(data.settings) localStorage.setItem('radiobio_settings',JSON.stringify(data.settings));
+      if(data.history) localStorage.setItem('radiobio_v2',JSON.stringify(data.history));
+      alert('Impor berhasil! Halaman akan dimuat ulang.');
+      location.reload();
+    } catch(err){
+      alert('Gagal mengimpor: '+err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+function resetAllData(){
+  if(!confirm('PERINGATAN: Semua data pengaturan, staf, dan riwayat pasien akan dihapus permanen. Lanjutkan?'))return;
+  if(!confirm('Konfirmasi kedua: Tindakan ini tidak dapat dibatalkan. Yakin?'))return;
+  localStorage.removeItem('radiobio_settings');
+  localStorage.removeItem('radiobio_v2');
+  alert('Semua data telah dihapus. Halaman akan dimuat ulang.');
+  location.reload();
+}
+
+// ---- INIT ----
+document.getElementById('pt-date').value=new Date().toISOString().slice(0,10);
+renderRef(); renderHistory(); renderDayList();
+refreshPrintDisplays(); refreshPrintSelects();
+autoFillEndDate();
+setupRangePreview();
+</script>
+</body>
+</html>
