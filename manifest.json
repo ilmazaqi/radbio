@@ -1,10 +1,11 @@
 {
-  "name": "Kalkulator BED",
-  "short_name": "BED Calc",
-  "start_url": "./index.html", 
+  "name": "Radiobiologi Klinik App",
+  "short_name": "Radiobio",
+  "description": "Kalkulator Radiobiologi Klinik BED, EQD2, dan OTT",
+  "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#f4f2ed",
+  "theme_color": "#0F6E56",
   "icons": [
     {
       "src": "icon-192.png",
