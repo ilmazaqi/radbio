@@ -415,7 +415,6 @@
       <div style="font-family:sans-serif;font-size:12px;color:var(--text-secondary);margin-bottom:12px">
         Institusi dan staf diambil dari <strong>Pengaturan Sistem</strong>. Pilih dari daftar di bawah.
       </div>
-      <!-- Institusi info (read-only from settings) -->
       <div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:12px;font-family:sans-serif;font-size:13px;display:flex;gap:24px;flex-wrap:wrap">
         <div><span style="color:var(--text-secondary);font-size:11px;text-transform:uppercase;letter-spacing:.04em">Institusi</span><br><strong id="print-inst-display">—</strong></div>
         <div><span style="color:var(--text-secondary);font-size:11px;text-transform:uppercase;letter-spacing:.04em">Departemen</span><br><strong id="print-dept-display">—</strong></div>
@@ -448,7 +447,6 @@
   <!-- PENGATURAN SISTEM -->
   <div id="sec-settings" class="section">
 
-    <!-- Institusi -->
     <div class="card">
       <div class="card-title">Identitas Institusi</div>
       <div class="grid2">
@@ -465,7 +463,6 @@
       </div>
     </div>
 
-    <!-- Libur Lokal -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:8px">
         <div class="card-title" style="margin-bottom:0">Libur Lokal / Hari Khusus</div>
@@ -481,7 +478,6 @@
       </div>
     </div>
 
-    <!-- Fisikawan Medis -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
         <div class="card-title" style="margin-bottom:0">Daftar Fisikawan Medis</div>
@@ -490,7 +486,6 @@
       <div id="physicist-list"></div>
     </div>
 
-    <!-- Dokter Onkologi -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
         <div class="card-title" style="margin-bottom:0">Daftar Dokter Onkologi Radiasi</div>
@@ -499,7 +494,6 @@
       <div id="oncologist-list"></div>
     </div>
 
-    <!-- Backup & Restore -->
     <div class="card">
       <div class="card-title">Backup &amp; Pemulihan Data</div>
       <div style="font-family:sans-serif;font-size:13px;color:var(--text-secondary);margin-bottom:1rem;line-height:1.6">
@@ -614,7 +608,6 @@ const TOL=[
 ];
 const ALASAN=['Mesin Rusak / Maintenance','Pasien Sakit / Rawat Inap','Libur Nasional','Kendala Administrasi','Efek Samping Akut RT','Cuaca / Force Majeure','Alasan Pribadi Pasien','Lainnya'];
 
-// Dprolif reference data: [tumor, dprolif_range, dprolif_typical, Td_days, Tk_days, source_note]
 const DPROLIF_DATA=[
   ['Ca Kepala & Leher (HNSCC)','0.5–0.8','0.64','3–5','21–28','Withers et al. 1988; Kim & Tannock 2005'],
   ['Ca Nasofaring','0.5–0.7','0.60','4–6','21','Lee et al.; standar klinis regional'],
@@ -744,7 +737,6 @@ function closeModal(){
   document.getElementById('staff-modal').style.cssText='display:none';
   _modalEditId=null;
 }
-// Enter key submits modal
 document.addEventListener('keydown',function(e){
   const modal=document.getElementById('staff-modal');
   if(modal.style.display==='flex'){
@@ -752,7 +744,6 @@ document.addEventListener('keydown',function(e){
     if(e.key==='Escape') closeModal();
   }
 });
-// Backdrop click closes modal — use event delegation on document
 document.addEventListener('click',function(e){
   if(e.target&&e.target.id==='staff-modal') closeModal();
 });
@@ -881,21 +872,35 @@ function renderHolidayList(){
       </div>`).join('')+'</div>';
 }
 
-// ---- AUTO-FILL TANGGAL SELESAI RT ----
+// ---- DATE UTILITIES ----
+// Parse a YYYY-MM-DD string safely without timezone shifting
+function parseLocalDate(ds){
+  const [y,m,d]=ds.split('-').map(Number);
+  return new Date(y, m-1, d);
+}
+// Format a Date object to YYYY-MM-DD string using local time
+function toDateStr(d){
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const dd=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${dd}`;
+}
+
 function isWeekend(d){
   const day=d.getDay(); return day===0||day===6;
 }
 function isHoliday(d, holidaySet){
-  return holidaySet.has(d.toISOString().slice(0,10));
+  return holidaySet.has(toDateStr(d));
 }
 function isTreatmentDay(d, holidaySet, fracPerWeek){
-  // fracPerWeek 5 = Senin-Jumat, 6 = Senin-Sabtu, 7 = semua hari
-  const day=d.getDay(); // 0=Sun,1=Mon,...,6=Sat
+  const day=d.getDay();
   if(fracPerWeek<=5 && (day===0||day===6)) return false;
   if(fracPerWeek===6 && day===0) return false;
   if(isHoliday(d, holidaySet)) return false;
   return true;
 }
+
+// ---- AUTO-FILL TANGGAL SELESAI RT ----
 function autoFillEndDate(){
   const ts=document.getElementById('p-ts').value;
   const n=parseInt(document.getElementById('p-n').value)||0;
@@ -912,24 +917,24 @@ function autoFillEndDate(){
   const holidaySet=new Set(holidays.map(h=>h.date));
   const fwClamped=Math.min(Math.max(fw,1),7);
 
-  let cur=new Date(ts+'T00:00:00');
+  let cur=parseLocalDate(ts);
   let fracDone=0;
-  let calDays=0;
   let skippedWeekend=0, skippedHoliday=0;
   const skippedHolidayNames=[];
   const MAX_ITER=1000; let iter=0;
 
-  // Start date itself: if it's not a treatment day, find first valid
+  // Find first valid treatment day from start date
   while(!isTreatmentDay(cur, holidaySet, fwClamped) && iter<MAX_ITER){
     if(isWeekend(cur)) skippedWeekend++;
     else if(isHoliday(cur, holidaySet)){
       skippedHoliday++;
-      const hd=holidays.find(h=>h.date===cur.toISOString().slice(0,10));
+      const ds=toDateStr(cur);
+      const hd=holidays.find(h=>h.date===ds);
       if(hd&&!skippedHolidayNames.includes(hd.name)) skippedHolidayNames.push(hd.name);
     }
     cur.setDate(cur.getDate()+1); iter++;
   }
-  // Count fractions from start date
+
   const realStart=new Date(cur);
   iter=0;
   while(fracDone<n && iter<MAX_ITER){
@@ -940,28 +945,28 @@ function autoFillEndDate(){
       if(isWeekend(cur)) skippedWeekend++;
       else if(isHoliday(cur, holidaySet)){
         skippedHoliday++;
-        const hd=holidays.find(h=>h.date===cur.toISOString().slice(0,10));
+        const ds=toDateStr(cur);
+        const hd=holidays.find(h=>h.date===ds);
         if(hd&&!skippedHolidayNames.includes(hd.name)) skippedHolidayNames.push(hd.name);
       }
     }
     cur.setDate(cur.getDate()+1); iter++;
   }
 
-  const endDate=cur.toISOString().slice(0,10);
-  calDays=Math.round((cur-realStart)/86400000)+1;
+  const endDate=toDateStr(cur);
+  const calDays=Math.round((cur-realStart)/86400000)+1;
   teEl.value=endDate;
 
   if(hintEl) hintEl.textContent=`Dihitung otomatis — ${n} fraksi dalam ${calDays} hari kalender`;
 
-  // Build info box
   if(infoEl){
     const wd=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-    const fmt=d=>new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+    const fmt=ds=>parseLocalDate(ds).toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
     let holidayNote=skippedHolidayNames.length
       ? '<br>Libur dilewati: <strong>'+skippedHolidayNames.join(', ')+'</strong>'
       : '';
     infoEl.innerHTML=
-      `<strong>Mulai RT:</strong> ${fmt(ts)} (${wd[new Date(ts+'T00:00:00').getDay()]}) &nbsp;|&nbsp; `+
+      `<strong>Mulai RT:</strong> ${fmt(ts)} (${wd[parseLocalDate(ts).getDay()]}) &nbsp;|&nbsp; `+
       `<strong>Selesai RT:</strong> ${fmt(endDate)} (${wd[cur.getDay()]}) &nbsp;|&nbsp; `+
       `<strong>OTT:</strong> ${calDays} hari kalender<br>`+
       `Sesi RT: <strong>${n} fraksi</strong> &nbsp;|&nbsp; Akhir pekan dilewati: <strong>${skippedWeekend} hari</strong>`+
@@ -970,6 +975,7 @@ function autoFillEndDate(){
     infoEl.style.display='block';
   }
 }
+
 function calculate(){
   const d=v('p-d'),n=v('p-n'),abt=v('p-abt'),abo=v('p-abo'),fw=v('p-fw')||5,dp=v('p-dp')||0.6;
   if(!d||!n||!abt||!abo){alert('Lengkapi parameter fraksinasi dan α/β.');return;}
@@ -978,8 +984,11 @@ function calculate(){
   const EQD2t=BEDt/(1+2/abt), EQD2o=BEDo/(1+2/abo);
   let OTT=0,BEDott=BEDt;
   const ts=s('p-ts'),te=s('p-te');
-  if(ts&&te){OTT=Math.round((new Date(te)-new Date(ts))/86400000)+1;}
-  else{OTT=Math.ceil(n/fw*7);}
+  if(ts&&te){
+    OTT=Math.round((parseLocalDate(te)-parseLocalDate(ts))/86400000)+1;
+  } else {
+    OTT=Math.ceil(n/fw*7);
+  }
   BEDott=BEDt-dp*OTT;
 
   document.getElementById('r-D').textContent=D.toFixed(1)+' Gy ('+n+' fx × '+d+' Gy)';
@@ -1011,10 +1020,8 @@ function renderDayList(){
     return;
   }
 
-  // Sort before rendering
   interruptDays.sort((a,b)=>a.date.localeCompare(b.date));
 
-  // Group consecutive dates for visual clarity
   const grouped=[];
   let grp=null;
   interruptDays.forEach((item,i)=>{
@@ -1057,14 +1064,14 @@ function renderDayList(){
 }
 
 function dayDiff(d1,d2){
-  return Math.round((new Date(d2+'T00:00:00')-new Date(d1+'T00:00:00'))/86400000);
+  return Math.round((parseLocalDate(d2)-parseLocalDate(d1))/86400000);
 }
 function fmt(ds){
-  return new Date(ds+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
+  return parseLocalDate(ds).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
 }
 
 function addDay(){
-  const today=new Date().toISOString().slice(0,10);
+  const today=toDateStr(new Date());
   interruptDays.push({date:today,alasan:ALASAN[0]});
   renderDayList();
 }
@@ -1094,7 +1101,6 @@ function clearDays(){
 
 // -- Range input live preview --
 function setupRangePreview(){
-  // Populate alasan dropdown
   const ra=document.getElementById('range-alasan');
   if(ra&&!ra.options.length) ra.innerHTML=ALASAN.map(a=>`<option>${a}</option>`).join('');
   ['range-from','range-to','range-mode'].forEach(id=>{
@@ -1110,24 +1116,46 @@ function updateRangePreview(){
   const prev=document.getElementById('range-preview');
   if(!prev) return;
   if(!from||!to){ prev.textContent=''; return; }
-  const d1=new Date(from+'T00:00:00'), d2=new Date(to+'T00:00:00');
-  if(d2<d1){ prev.textContent='⚠ Tanggal akhir harus setelah tanggal mulai.'; return; }
+  if(to < from){ prev.textContent='⚠ Tanggal akhir harus setelah tanggal mulai.'; return; }
   const days=buildRangeDays(from,to,mode);
   prev.textContent=`→ ${days.length} hari akan ditambahkan (${mode==='treatment'?'hari sinar saja, weekend & libur dilewati':'semua hari kalender'})`;
 }
 
-function buildRangeDays(from,to,mode){
+// ============================================================
+// FIX UTAMA: buildRangeDays
+// Masalah asal: new Date(from+'T00:00:00') kemudian setDate()
+// menyebabkan objek Date bergeser karena mutasi + timezone.
+// Solusi: iterasi menggunakan string YYYY-MM-DD secara langsung,
+// parse dengan parseLocalDate() agar tidak ada timezone shift.
+// ============================================================
+function buildRangeDays(from, to, mode){
   const holidays=getHolidays();
   const holidaySet=new Set(holidays.map(h=>h.date));
-  const days=[];
-  let cur=new Date(from+'T00:00:00');
-  const end=new Date(to+'T00:00:00');
   const fw=lastCalc?lastCalc.params.fw:5;
-  while(cur<=end){
-    const ds=cur.toISOString().slice(0,10);
-    if(mode==='all' || isTreatmentDay(cur,holidaySet,fw)) days.push(ds);
-    cur.setDate(cur.getDate()+1);
+  const days=[];
+
+  // Gunakan parseLocalDate agar tidak ada timezone shift
+  const startDate=parseLocalDate(from);
+  const endDate=parseLocalDate(to);
+
+  // Validasi: end harus >= start
+  if(endDate < startDate) return days;
+
+  // Iterasi hari per hari menggunakan salinan Date (bukan mutasi langsung)
+  let cur=new Date(startDate);
+  const MAX_ITER=3650; // maksimal 10 tahun
+  let iter=0;
+
+  while(cur <= endDate && iter < MAX_ITER){
+    const ds=toDateStr(cur);
+    if(mode==='all' || isTreatmentDay(cur, holidaySet, fw)){
+      days.push(ds);
+    }
+    // Tambah 1 hari dengan aman: set ke hari berikutnya
+    cur=new Date(cur.getFullYear(), cur.getMonth(), cur.getDate()+1);
+    iter++;
   }
+
   return days;
 }
 
@@ -1137,18 +1165,20 @@ function addDayRange(){
   const alasan=document.getElementById('range-alasan').value;
   const mode=document.getElementById('range-mode').value;
   if(!from||!to){alert('Isi tanggal mulai dan tanggal akhir.');return;}
-  const d1=new Date(from+'T00:00:00'), d2=new Date(to+'T00:00:00');
-  if(d2<d1){alert('Tanggal akhir harus setelah tanggal mulai.');return;}
+  if(to < from){alert('Tanggal akhir harus setelah tanggal mulai.');return;}
+
   const days=buildRangeDays(from,to,mode);
   if(!days.length){alert('Tidak ada hari sinar dalam rentang tersebut (semua akhir pekan/libur).');return;}
-  // Add only dates not already in list
+
   const existing=new Set(interruptDays.map(x=>x.date));
   let added=0;
   days.forEach(ds=>{ if(!existing.has(ds)){interruptDays.push({date:ds,alasan});added++;} });
   renderDayList();
+
   const prev=document.getElementById('range-preview');
-  if(prev) prev.textContent=`✓ ${added} hari ditambahkan${days.length-added>0?' ('+( days.length-added)+' hari sudah ada, dilewati)':''}.`;
-  // Clear range inputs
+  if(prev) prev.textContent=`✓ ${added} hari ditambahkan (${fmt(from)} – ${fmt(to)})${days.length-added>0?' · '+(days.length-added)+' hari sudah ada, dilewati':''}.`;
+
+  // Reset input rentang
   document.getElementById('range-from').value='';
   document.getElementById('range-to').value='';
 }
@@ -1161,7 +1191,7 @@ function calcInterrupt(){
   const {d,n,abt,abo,dp,fw,ts,te}=lastCalc.params;
   const {BEDt,BEDo,EQD2t,EQD2o,OTT}=lastCalc.results;
 
-  const sorted=[...interruptDays].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const sorted=[...interruptDays].sort((a,b)=>a.date.localeCompare(b.date));
   const uniqueDates=[...new Set(sorted.map(x=>x.date))];
   const totalDays=uniqueDates.length;
 
@@ -1212,9 +1242,8 @@ function calcInterrupt(){
   nel.textContent=note;
   nel.className='note'+(oar_safe?'':' red');
 
-  // Detail table
   document.getElementById('i-detail').innerHTML=sorted.map((item,i)=>{
-    const fracEst=ts?Math.max(0,Math.round((new Date(item.date)-new Date(ts))/86400000*(fw/5))):'-';
+    const fracEst=ts?Math.max(0,Math.round((parseLocalDate(item.date)-parseLocalDate(ts))/86400000*(fw/7))):'-';
     return `<tr>
       <td>${i+1}</td><td>${item.date}</td><td>${item.alasan}</td>
       <td>${fracEst!=='-'?'Setelah fraksi ke-'+fracEst:'—'}</td>
@@ -1305,14 +1334,12 @@ function generatePrint(){
   if(!lastCalc){alert('Lakukan kalkulasi terlebih dahulu.');showTab('calc');return;}
   const r=lastCalc.results,p=lastCalc.patient,pm=lastCalc.params;
 
-  // Get institution from settings
   const cfg=loadSettings();
   const inst=cfg.inst||'____________________';
   const dept=cfg.dept||'Departemen Radioterapi';
   const addr=cfg.addr||'';
   const contact=cfg.contact||'';
 
-  // Get selected staff — with full details
   const phId=document.getElementById('s-ph').value;
   const ocId=document.getElementById('s-oc').value;
   const phObj=getStaff('physicist').find(x=>x.id===phId)||null;
@@ -1524,7 +1551,7 @@ function resetAllData(){
 }
 
 // ---- INIT ----
-document.getElementById('pt-date').value=new Date().toISOString().slice(0,10);
+document.getElementById('pt-date').value=toDateStr(new Date());
 renderRef(); renderHistory(); renderDayList();
 refreshPrintDisplays(); refreshPrintSelects();
 autoFillEndDate();
