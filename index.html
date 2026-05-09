@@ -114,6 +114,20 @@
   #staff-modal{display:none;}
   #staff-modal.open{display:flex!important;}
 </style>
+ <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0F6E56">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('SW registered!'))
+        .catch(err => console.log('SW failed!', err));
+    });
+  }
+</script>
+
 </head>
 <body>
 <div class="app">
@@ -532,6 +546,31 @@
       <div class="ow"><table class="history-table"><thead><tr><th>Organ</th><th>Batasan EQD2</th><th>Endpoint</th></tr></thead><tbody id="tol-table"></tbody></table></div>
     </div>
     <div class="card">
+      <div class="card-title">Nilai Dprolif — Laju Repopulasi Klonogenik Tumor</div>
+      <div style="font-family:sans-serif;font-size:12px;color:var(--text-secondary);margin-bottom:10px;line-height:1.6">
+        Dprolif (dosis proliferasi) merupakan laju pertumbuhan kembali sel klonogenik tumor selama terapi, dinyatakan dalam Gy BED per hari. Nilai ini digunakan dalam koreksi OTT dan kalkulasi kompensasi hari tidak sinar.
+      </div>
+      <div class="ow">
+        <table class="history-table" id="dprolif-table">
+          <thead>
+            <tr>
+              <th>Jenis Tumor / Jaringan</th>
+              <th>Dprolif (Gy/hari)</th>
+              <th>Td (hari)</th>
+              <th>Tk (hari)</th>
+              <th>Sumber / Keterangan</th>
+              <th style="text-align:center">Gunakan</th>
+            </tr>
+          </thead>
+          <tbody id="dprolif-tbody"></tbody>
+        </table>
+      </div>
+      <div style="font-family:sans-serif;font-size:11px;color:var(--text-tertiary);margin-top:8px;line-height:1.6">
+        <strong>Td</strong> = Waktu penggandaan sel klonogen (tumor doubling time) · <strong>Tk</strong> = Waktu onset repopulasi (kick-off time) · Nilai merupakan estimasi dari literatur, bervariasi antar individu dan subtipe tumor.
+      </div>
+    </div>
+
+    <div class="card">
       <div class="card-title">Pedoman Kompensasi Interupsi</div>
       <div style="font-family:sans-serif;font-size:13px;line-height:1.8;color:var(--text-primary)">
         <p style="margin-bottom:.5rem"><strong>Prinsip dasar:</strong> Setiap hari perpanjangan terapi setelah onset repopulasi klonogenik (~hari ke-21 RT) menyebabkan kehilangan BED setara Dprolif (0.5–0.7 Gy/hari).</p>
@@ -574,6 +613,27 @@ const TOL=[
   ['Brainstem','54 Gy','Neuropati berat'],
 ];
 const ALASAN=['Mesin Rusak / Maintenance','Pasien Sakit / Rawat Inap','Libur Nasional','Kendala Administrasi','Efek Samping Akut RT','Cuaca / Force Majeure','Alasan Pribadi Pasien','Lainnya'];
+
+// Dprolif reference data: [tumor, dprolif_range, dprolif_typical, Td_days, Tk_days, source_note]
+const DPROLIF_DATA=[
+  ['Ca Kepala & Leher (HNSCC)','0.5–0.8','0.64','3–5','21–28','Withers et al. 1988; Kim & Tannock 2005'],
+  ['Ca Nasofaring','0.5–0.7','0.60','4–6','21','Lee et al.; standar klinis regional'],
+  ['Ca Serviks','0.5–0.8','0.60','4–6','28','Fyles et al.; data prospektif'],
+  ['Ca Paru (NSCLC)','0.4–0.6','0.50','4–7','21','CHART trial; Saunders et al.'],
+  ['Ca Paru (SCLC)','0.5–0.8','0.65','2–4','14–21','Highly proliferative'],
+  ['Ca Payudara','0.3–0.5','0.40','10–20','Tidak signifikan','Repopulasi lambat, Tk panjang'],
+  ['Ca Prostat','0.2–0.4','0.30','30–60','Tidak signifikan','Indolent; repopulasi minimal'],
+  ['Ca Esofagus','0.5–0.7','0.58','4–6','21','Data terbatas, estimasi HNSCC'],
+  ['Ca Rektum','0.3–0.6','0.45','5–10','28','Colorectal RT data'],
+  ['Ca Endometrium','0.3–0.5','0.40','7–15','Tidak signifikan','Late-stage data terbatas'],
+  ['Ca Buli-buli','0.4–0.6','0.50','5–10','21','BCON trial; Hoskin et al.'],
+  ['Glioblastoma (GBM)','0.4–0.7','0.55','5–10','21','Stupp protocol; infiltratif'],
+  ['Medulloblastoma','0.5–0.7','0.60','3–6','21','Pediatrik, proliferatif tinggi'],
+  ['Limfoma','0.3–0.6','0.50','2–5','14','Sangat responsif, variabel'],
+  ['Melanoma','0.3–0.5','0.40','4–10','21–28','Radioresisten; data terbatas'],
+  ['Hepatoselular (HCC)','0.3–0.5','0.40','5–15','28','Latar sirosis; variabel'],
+  ['Umum (default klinis)','0.5–0.7','0.60','—','21','Nilai tipikal ESTRO/ICRU'],
+];
 
 let lastCalc=null, interruptDays=[], lastInt=null;
 
@@ -1390,8 +1450,34 @@ function renderRef(){
     `<tr><td>${r[0]}</td><td style="font-weight:500">${r[1]}</td>
     <td><span style="font-size:11px;padding:2px 8px;border-radius:4px;background:${r[2]==='Tumor'?'#E1F5EE':'#FAEEDA'};color:${r[2]==='Tumor'?'#0F6E56':'#854F0B'}">${r[2]}</span></td>
     <td style="color:var(--text-secondary)">${r[3]}</td></tr>`).join('');
+
   document.getElementById('tol-table').innerHTML=TOL.map(r=>
     `<tr><td>${r[0]}</td><td style="font-weight:500">${r[1]}</td><td style="color:var(--text-secondary)">${r[2]}</td></tr>`).join('');
+
+  document.getElementById('dprolif-tbody').innerHTML=DPROLIF_DATA.map(r=>`
+    <tr>
+      <td style="font-weight:500">${r[0]}</td>
+      <td>
+        <span style="font-size:12px;font-weight:600;background:var(--amber-50);color:var(--amber-600);padding:2px 8px;border-radius:4px">${r[1]}</span>
+        <span style="font-size:11px;color:var(--text-tertiary);margin-left:4px">tipikal: ${r[2]}</span>
+      </td>
+      <td style="color:var(--text-secondary);font-size:12px">${r[3]}</td>
+      <td style="color:var(--text-secondary);font-size:12px">${r[4]}</td>
+      <td style="color:var(--text-tertiary);font-size:11px;max-width:200px">${r[5]}</td>
+      <td style="text-align:center">
+        <button class="preset-btn" style="color:var(--teal-600);border-color:var(--teal-600);white-space:nowrap"
+          onclick="applyDprolif(${r[2]})">
+          Gunakan ${r[2]}
+        </button>
+      </td>
+    </tr>`).join('');
+}
+
+function applyDprolif(val){
+  document.getElementById('p-dp').value=val;
+  showTab('calc');
+  document.getElementById('p-dp').style.boxShadow='0 0 0 3px rgba(15,110,86,0.3)';
+  setTimeout(()=>document.getElementById('p-dp').style.boxShadow='',1500);
 }
 
 // ---- BACKUP & RESTORE ----
@@ -1444,16 +1530,5 @@ refreshPrintDisplays(); refreshPrintSelects();
 autoFillEndDate();
 setupRangePreview();
 </script>
- <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('SW Registered'))
-        .catch(err => console.log('SW Failed', err));
-    });
-  }
- </script>
- 
-
 </body>
 </html>
